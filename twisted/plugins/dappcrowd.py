@@ -9,7 +9,8 @@ import sys
 
 import logging
 
-from dappcrowd.community import DAppCrowdCommunity, DAppCrowdTrustchainCommunity
+import ipfsapi
+
 from pyipv8.ipv8.peerdiscovery.discovery import RandomWalk
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -25,11 +26,15 @@ from pyipv8.ipv8_service import IPv8
 from pyipv8.ipv8.attestation.trustchain.settings import TrustChainSettings
 from pyipv8.ipv8.REST.rest_manager import RESTManager
 
+from dappcrowd.community import DAppCrowdCommunity, DAppCrowdTrustchainCommunity
+from dappcrowd.restapi.root_endpoint import RootEndpoint
+
 
 class Options(usage.Options):
     optParameters = [
         ["statedir", "s", ".", "Use an alternate statedir", str],
-        ["apiport", "p", 8085, "Use an alternative port for the REST api", int],
+        ["port", "p", 8090, "Use an alternative port for IPv8", int],
+        ["apiport", "a", 8085, "Use an alternative port for the REST api", int],
     ]
     optFlags = [
     ]
@@ -89,6 +94,7 @@ class DappCrowdServiceMaker(object):
 
     def __init__(self):
         self.ipv8 = None
+        self.ipfs_api = None
         self.restapi = None
         self._stopping = False
 
@@ -109,6 +115,7 @@ class DappCrowdServiceMaker(object):
             for key in config["keys"]:
                 key["file"] = os.path.join(options["statedir"], key["file"])
 
+        config['port'] = options["port"]
         self.ipv8 = IPv8(config)
 
         # Load TrustChain + DAppCrowd community
@@ -139,8 +146,11 @@ class DappCrowdServiceMaker(object):
 
         msg("Starting DAppCrowd")
 
+        self.ipfs_api = ipfsapi.connect('127.0.0.1', 5001)
+
         self.restapi = RESTManager(self.ipv8)
-        reactor.callLater(0.0, self.restapi.start, options["apiport"])
+        self.restapi.start(options["apiport"])
+        self.restapi.root_endpoint.putChild("dappcrowd", RootEndpoint(self.ipv8, self.ipfs_api))
 
     def makeService(self, options):
         """
