@@ -1,1 +1,7 @@
 **.DS_Store
+**.pyc
+.idea/**
+ec.pem
+ec_multichain.pem
+sqlite/**
+twisted/plugins/dropin.cache
