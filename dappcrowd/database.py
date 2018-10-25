@@ -54,7 +54,28 @@ class DAppCrowdDatabase(Database):
         
          PRIMARY KEY (id, public_key)
          );
-
+         
+         CREATE TABLE IF NOT EXISTS submissions(
+         id                 INTEGER NOT NULL,
+         public_key         TEXT NOT NULL,
+         apprequest_id      INTEGER NOT NULL,
+         apprequest_pk      TEXT NOT NULL,
+         submission         TEXT NOT NULL,
+         num_reviews        INTEGER NOT NULL,
+         
+         PRIMARY KEY (id, public_key)
+         );
+         
+         CREATE TABLE IF NOT EXISTS reviews(
+         id                 INTEGER NOT NULL,
+         public_key         TEXT NOT NULL,
+         submission_id      INTEGER NOT NULL,
+         submission_pk      TEXT NOT NULL,
+         review             TEXT NOT NULL,
+         
+         PRIMARY KEY (id, public_key)
+         );
+         
         CREATE TABLE IF NOT EXISTS option(key TEXT PRIMARY KEY, value BLOB);
         DELETE FROM option WHERE key = 'database_version';
         INSERT INTO option(key, value) VALUES('database_version', '%s');
@@ -65,7 +86,6 @@ class DAppCrowdDatabase(Database):
         Return the upgrade script for a specific version.
         :param current_version: the version of the script to return.
         """
-        print current_version
         return None
 
     def add_app_request(self, block):
@@ -100,6 +120,67 @@ class DAppCrowdDatabase(Database):
             requests_list.append(request_dict)
 
         return requests_list
+
+    def add_submission(self, block):
+        """
+        Add a submission to the database, from a given block
+        """
+        tx = block.transaction
+        last_id = list(self.execute("SELECT MAX(id) FROM submissions"))[0][0]
+        if not last_id:
+            last_id = 0
+        sql = "INSERT INTO submissions(id, public_key, apprequest_id, apprequest_pk, submission, num_reviews) VALUES(?, ?, ?, ?, ?, ?)"
+        self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['apprequest_id']), database_blob(tx['apprequest_pk']), database_blob(tx['submission']), 0))
+        self.commit()
+
+    def get_submissions(self, apprequest_id, apprequest_pk):
+        """
+        Get all submission for a specific app request.
+        """
+        submissions = list(self.execute("SELECT * FROM submissions WHERE apprequest_id = ? AND apprequest_pk = ?", (database_blob(apprequest_id), database_blob(apprequest_pk))))
+        submissions_list = []
+        for submission in submissions:
+            submission_dict = {
+                "id": submission[0],
+                "public_key": str(submission[1]).encode('hex'),
+                "apprequest_id": int(submission[2]),
+                "apprequest_pk": str(submission[3]).encode('hex'),
+                "submission": str(submission[4]),
+                "num_reviews": submission[5]
+            }
+            submissions_list.append(submission_dict)
+
+        return submissions_list
+
+    def add_review(self, block):
+        """
+        Add a review to the database, from a given block
+        """
+        tx = block.transaction
+        last_id = list(self.execute("SELECT MAX(id) FROM submissions"))[0][0]
+        if not last_id:
+            last_id = 0
+        sql = "INSERT INTO reviews(id, public_key, submission_id, submission_pk, review) VALUES(?, ?, ?, ?, ?)"
+        self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['submission_id']), database_blob(tx['submission_pk']), database_blob(tx['review'])))
+        self.commit()
+
+    def get_reviews(self, submission_id, submission_pk):
+        """
+        Get all reviews for a specific submission.
+        """
+        reviews = list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ?", (database_blob(submission_id), database_blob(submission_pk))))
+        reviews_list = []
+        for review in reviews:
+            submission_dict = {
+                "id": review[0],
+                "public_key": str(review[1]).encode('hex'),
+                "submission_id": int(review[2]),
+                "submission_pk": str(review[3]).encode('hex'),
+                "review": str(review[4]),
+            }
+            reviews_list.append(submission_dict)
+
+        return reviews_list
 
     def open(self, initial_statements=True, prepare_visioning=True):
         return super(DAppCrowdDatabase, self).open(initial_statements, prepare_visioning)
