@@ -8,6 +8,10 @@ from dappcrowd.restapi.root_endpoint import DAppCrowdEndpoint
 
 class ReviewsEndpoint(DAppCrowdEndpoint):
 
+    def __init__(self, ipv8, ipfs_api):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.putChild("request", RequestReviewEndpoint(ipv8, ipfs_api))
+
     def render_GET(self, request):
         """
         Get all reviews for a specific submission.
@@ -47,7 +51,24 @@ class ReviewsEndpoint(DAppCrowdEndpoint):
             request.write(json.dumps({"success": True}))
             request.finish()
 
-        trustchain.create_source_block(block_type='dappcrowd_review', transaction=tx).addCallback(
-            on_block_created)
+        trustchain.create_source_block(block_type='dappcrowd_review', transaction=tx).addCallback(on_block_created)
 
         return NOT_DONE_YET
+
+
+class RequestReviewEndpoint(DAppCrowdEndpoint):
+
+    def render_POST(self, request):
+        """
+        Request a specific user for a review.
+        """
+        parameters = http.parse_qs(request.content.read(), 1)
+        required_params = ['submission_id', 'requester_pk']
+        for required_param in required_params:
+            if required_param not in parameters:
+                request.setResponseCode(http.BAD_REQUEST)
+                return json.dumps({"error": "missing parameter %s" % required_param})
+
+        self.get_dappcrowd_overlay().request_review(parameters['submission_id'][0], parameters['requester_pk'][0])
+
+        return json.dumps({"success": True})

@@ -157,7 +157,7 @@ class DAppCrowdDatabase(Database):
         Add a review to the database, from a given block
         """
         tx = block.transaction
-        last_id = list(self.execute("SELECT MAX(id) FROM submissions"))[0][0]
+        last_id = list(self.execute("SELECT MAX(id) FROM reviews"))[0][0]
         if not last_id:
             last_id = 0
         sql = "INSERT INTO reviews(id, public_key, submission_id, submission_pk, review) VALUES(?, ?, ?, ?, ?)"
