@@ -4,11 +4,11 @@ import sys
 
 import ipfsapi
 from PyQt5 import uic
-from PyQt5.QtCore import QSize, pyqtSignal
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem
 
-from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE
+from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE, \
+    APPREQUESTS_PAGE, PROFILE_PAGE
 from gui.dialogs.confirmationdialog import ConfirmationDialog
 from gui.requestmanager import RequestManager
 from gui.widgets.leftmenuitem import LeftMenuItem
@@ -54,6 +54,7 @@ class DAppCrowdWindow(QMainWindow):
         self.notifications_button.clicked.connect(self.on_notifications_button_clicked)
         self.top_menu_button.clicked.connect(self.on_top_bar_button_clicked)
         self.top_menu_users_button.clicked.connect(self.on_top_bar_users_button_clicked)
+        self.user_profile_button.clicked.connect(self.on_user_profile_button_clicked)
 
         self.stackedWidget.setCurrentIndex(TIMELINE_PAGE)
 
@@ -92,6 +93,14 @@ class DAppCrowdWindow(QMainWindow):
     def on_top_bar_users_button_clicked(self):
         self.stackedWidget.setCurrentIndex(USERS_PAGE)
         self.users_page.load_users()
+
+    def on_user_profile_button_clicked(self):
+        self.stackedWidget.setCurrentIndex(PROFILE_PAGE)
+        if self.profile_page.active_user != self.profile_info['public_key']:
+            self.profile_page.load_user(self.profile_info['public_key'])
+
+    def on_top_bar_apprequests_button_clicked(self):
+        self.stackedWdiget.setCurrentIndex(APPREQUESTS_PAGE)
 
     def on_my_apprequests(self, data):
         self.my_app_requests = []

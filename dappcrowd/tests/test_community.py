@@ -39,13 +39,32 @@ class TestDAppCrowdCommunity(TestBase):
         """
         Test whether a user is correctly verified in the system
         """
-        self.nodes[0].overlay.get_github_profile = lambda username: {
+        self.nodes[0].overlay.trustchain.get_github_profile = lambda username: {
             "username": username,
             "bio": self.nodes[0].overlay.my_peer.mid.encode('hex'),
             "followers": 1337
         }
-        yield self.nodes[0].overlay.import_github_profile("test")
+        yield self.nodes[0].overlay.trustchain.import_github_profile("test")
         yield self.deliver_messages()
 
         self.assertTrue(self.nodes[1].overlay.trustchain.persistence.is_verified_user(self.nodes[0].overlay.my_peer.public_key.key_to_bin()))
 
+    @inlineCallbacks
+    def test_skills(self):
+        """
+        Test creating a skill and endorsing another user
+        """
+        yield self.nodes[0].overlay.trustchain.add_skill('test')
+        yield self.deliver_messages()
+        peer1_pub_key = self.nodes[0].overlay.trustchain.my_peer.public_key.key_to_bin()
+        self.assertTrue(self.nodes[0].overlay.trustchain.persistence.get_skills(peer1_pub_key))
+
+        skills = self.nodes[1].overlay.trustchain.persistence.get_skills(peer1_pub_key)
+        self.assertTrue(skills)
+
+        # Peer 2 endorses peer 1 now
+        a = yield self.nodes[1].overlay.trustchain.endorse_skill(peer1_pub_key, skills[0]['block_num'])
+        yield self.deliver_messages()
+
+        skills = self.nodes[0].overlay.trustchain.persistence.get_skills(peer1_pub_key)
+        self.assertEqual(skills[0]['endorsements'], 1)

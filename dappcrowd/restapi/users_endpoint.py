@@ -17,7 +17,7 @@ class UsersEndpoint(DAppCrowdEndpoint):
 
     def render_GET(self, request):
         trustchain = self.get_trustchain()
-        return json.dumps({"users": trustchain.persistence.get_users_dict()})
+        return json.dumps({"users": trustchain.persistence.get_users_list()})
 
 
 class MyProfileEndpoint(DAppCrowdEndpoint):
@@ -25,11 +25,7 @@ class MyProfileEndpoint(DAppCrowdEndpoint):
     def render_GET(self, request):
         trustchain = self.get_trustchain()
         my_pub_key = trustchain.my_peer.public_key.key_to_bin()
-        profile_dict = {
-            "public_key": my_pub_key.encode('hex'),
-            "verified": trustchain.persistence.is_verified_user(my_pub_key)
-        }
-        return json.dumps({"profile": profile_dict})
+        return json.dumps({"profile": trustchain.persistence.get_detailled_user_info(my_pub_key)})
 
 
 class SpecificUserEndpoint(DAppCrowdEndpoint):
@@ -37,33 +33,11 @@ class SpecificUserEndpoint(DAppCrowdEndpoint):
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.putChild("timeline", SpecificUserTimelineEndpoint(ipv8, ipfs_api, pub_key))
-        self.putChild("profile", SpecificUserProfileEndpoint(ipv8, ipfs_api, pub_key))
         self.pub_key = pub_key
 
     def render_GET(self, request):
-        verified = False
         trustchain = self.get_trustchain()
-        blocks_of_user = trustchain.persistence._getall(u"WHERE public_key = ?", database_blob(self.pub_key.decode('hex')))
-        if not blocks_of_user:
-            request.setResponseCode(http.NOT_FOUND)
-            return json.dumps("no available information for this user")
-
-        response = {
-            'public_key': self.pub_key
-        }
-
-        github_info_block = trustchain.persistence.get_blocks_with_type(block_type='dappcrowd_github', public_key=self.pub_key.decode('hex'))
-        if github_info_block:
-            verified = True
-            latest_block = github_info_block[-1]
-            response['github_info'] = {
-                'username': latest_block.transaction['username'],
-                'followers': latest_block.transaction['followers']
-            }
-
-        response['verified'] = verified
-
-        return json.dumps({"user": response})
+        return json.dumps({"user": trustchain.persistence.get_detailled_user_info(self.pub_key.decode('hex'))})
 
 
 class SpecificUserTimelineEndpoint(DAppCrowdEndpoint):
@@ -96,17 +70,3 @@ class SpecificUserTimelineEndpoint(DAppCrowdEndpoint):
                 review_info['type'] = 'dappcrowd_review'
 
         return json.dumps({"timeline": timeline_list})
-
-
-class SpecificUserProfileEndpoint(DAppCrowdEndpoint):
-
-    def __init__(self, ipv8, ipfs_api, pub_key):
-        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
-        self.pub_key = pub_key
-
-    def render_GET(self, request):
-        trustchain = self.get_trustchain()
-        profile_dict = {
-            "verified": trustchain.persistence.is_verified_user(self.pub_key)
-        }
-        return json.dumps({"profile": profile_dict})

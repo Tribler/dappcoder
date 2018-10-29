@@ -19,6 +19,47 @@ class DAppCrowdTrustchainCommunity(TrustChainCommunity):
                                  'c1570a31ae72'))
     DB_CLASS = DAppCrowdTrustChainDatabase
 
+    def get_github_profile(self, username):
+        """
+        Get the GitHub profile for a given username.
+        """
+        return requests.get("https://api.github.com/users/%s" % username).json()
+
+    def import_github_profile(self, username):
+        """
+        Import your GitHub profile.
+        """
+        profile_info = self.get_github_profile(username)
+        mid = self.my_peer.mid.encode('hex')
+        if not profile_info['bio'] or mid not in profile_info['bio']:
+            return fail(RuntimeError("your member ID (%s) should be in the GitHub bio!" % mid))
+
+        # Challenge successful, create TrustChain block
+        tx = {
+            'platform': 'github',
+            'username': username,
+            'followers': profile_info['followers']
+        }
+
+        self.create_source_block(block_type='devid_skill', transaction=tx)
+
+    def add_skill(self, name):
+        """
+        Add a skill to your developer portfolio.
+        """
+        tx = {
+            'name': name
+        }
+
+        return self.create_source_block(block_type='devid_skill', transaction=tx)
+
+    def endorse_skill(self, public_key, block_num):
+        """
+        Endorse a specific skill of another user, identified by a public key and block number
+        """
+        source_block = self.persistence.get(public_key, block_num)
+        return self.create_link(source_block)
+
 
 class DAppCrowdCommunity(Community, BlockListener):
 
@@ -63,30 +104,6 @@ class DAppCrowdCommunity(Community, BlockListener):
         block = self.trustchain.persistence.get_block_with_hash(block_hash)
         peer = self.network.get_verified_by_public_key_bin(block.public_key)
         self.trustchain.sign_block(peer, linked=block, additional_info={'accept': accept})
-
-    def get_github_profile(self, username):
-        """
-        Get the GitHub profile for a given username.
-        """
-        return requests.get("https://api.github.com/users/%s" % username).json()
-
-    def import_github_profile(self, username):
-        """
-        Import your GitHub profile.
-        """
-        profile_info = self.get_github_profile(username)
-        mid = self.trustchain.my_peer.mid.encode('hex')
-        if not profile_info['bio'] or mid not in profile_info['bio']:
-            return fail(RuntimeError("your member ID (%s) should be in the GitHub bio!" % mid))
-
-        # Challenge successful, create TrustChain block
-        tx = {
-            'platform': 'github',
-            'username': username,
-            'followers': profile_info['followers']
-        }
-
-        self.trustchain.create_source_block(block_type='dappcrowd_connection', transaction=tx)
 
     def unload(self):
         super(DAppCrowdCommunity, self).unload()

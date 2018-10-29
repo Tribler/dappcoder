@@ -19,29 +19,75 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         """
         Return whether the user is verified or not (imported GitHub profile).
         """
-        blocks = self.get_blocks_with_type(block_type='dappcrowd_connection', public_key=public_key)
-        return blocks is not None
+        blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
+        return len(blocks) > 0
 
     def get_username(self, public_key):
         """
         Return the username of a given public key, or unknown if he/she did not import an existing profile.
         """
-        blocks = self.get_blocks_with_type(block_type='dappcrowd_connection', public_key=public_key)
+        blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
         if not blocks:
             return 'unknown'
         return blocks[0].transaction['username']
 
-    def get_users_dict(self):
+    def get_detailled_user_info(self, public_key):
         """
-        Return a dictionary with information about all known users in the system.
+        Return a dictionary that contains information about a specific user.
+        """
+        github_info = None
+        bitbucket_info = None
+
+        imported_profiles_blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
+        if imported_profiles_blocks:
+            for profile_block in imported_profiles_blocks:
+                if profile_block.transaction['platform'] == 'github' and not github_info:
+                    github_info = {
+                        'username': profile_block.transaction['username'],
+                        'followers': profile_block.transaction['followers']
+                    }
+                # TODO BITBUCKET
+
+        return {
+            "public_key": public_key.encode('hex'),
+            "verified": self.is_verified_user(public_key),
+            "username": self.get_username(public_key),
+            "skills": self.get_skills(public_key),
+            "github_info": github_info,
+            "bitbucket_info": bitbucket_info
+        }
+
+    def get_users_list(self):
+        """
+        Return a list with information about all known users in the system.
         """
         user_dicts = []
         pub_keys = list(self.execute("SELECT DISTINCT public_key FROM blocks"))
         for tup_item in pub_keys:
             pub_key = str(tup_item[0])
             user_dicts.append({
-                "public_key": pub_key.encode('hex'),
-                "verified": self.is_verified_user(pub_key),
-                "username": self.get_username(pub_key)
-            })
+            "public_key": pub_key.encode('hex'),
+            "verified": self.is_verified_user(pub_key),
+            "username": self.get_username(pub_key),
+        })
         return user_dicts
+
+    def get_num_endorsements(self, skill_block):
+        """
+        Get the number of endorsements for a given skill block
+        """
+        return len(self._getall("WHERE type='devid_skill' AND link_public_key = ? AND link_sequence_number = ?", (database_blob(skill_block.public_key), skill_block.sequence_number)))
+
+    def get_skills(self, public_key):
+        """
+        Get all skills of a specific user.
+        """
+        skills_list = []
+        skill_blocks = self._getall("WHERE type='devid_skill' AND public_key = ?", (database_blob(public_key),))
+        for skill_block in skill_blocks:
+            skills_list.append({
+                "name": skill_block.transaction['name'],
+                "block_num": skill_block.sequence_number,
+                "endorsements": self.get_num_endorsements(skill_block)
+            })
+        return skills_list
