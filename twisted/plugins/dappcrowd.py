@@ -129,7 +129,8 @@ class DappCrowdServiceMaker(object):
         self.ipv8.overlays.append(dappcrowd_tc_community)
         self.ipv8.strategies.append((RandomWalk(dappcrowd_tc_community), 20))
 
-        dappcrowd_community = DAppCrowdCommunity(my_peer, self.ipv8.endpoint, self.ipv8.network)
+        dappcrowd_community = DAppCrowdCommunity(my_peer, self.ipv8.endpoint, self.ipv8.network,
+                                                 trustchain=dappcrowd_tc_community)
         self.ipv8.overlays.append(dappcrowd_community)
         self.ipv8.strategies.append((RandomWalk(dappcrowd_community), 20))
 

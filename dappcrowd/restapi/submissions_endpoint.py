@@ -10,14 +10,10 @@ class SubmissionsEndpoint(DAppCrowdEndpoint):
 
     def render_GET(self, request):
         """
-        Get all submissions for a specific apprequest.
+        Get all submissions.
         """
-        if 'id' not in request.args or 'pk' not in request.args:
-            request.setResponseCode(http.BAD_REQUEST)
-            return json.dumps("missing id or public key")
-
         dappcrowd_overlay = self.get_dappcrowd_overlay()
-        return json.dumps({"submissions": dappcrowd_overlay.persistence.get_submissions(request.args['id'][0], request.args['pk'][0])})
+        return json.dumps({"submissions": dappcrowd_overlay.persistence.get_submissions()})
 
     def render_PUT(self, request):
         """

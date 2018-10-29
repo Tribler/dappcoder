@@ -48,7 +48,7 @@ class DAppCrowdDatabase(Database):
         deadline           BIGINT NOT NULL,
         reward             DOUBLE NOT NULL,
         currency           TEXT NOT NULL,
-        min_validators     INTEGER NOT NULL,
+        min_reviews        INTEGER NOT NULL,
         notary_signature   TEXT NOT NULL,
         block_validators   INTEGER NOT NULL,
         
@@ -96,9 +96,9 @@ class DAppCrowdDatabase(Database):
         last_id = list(self.execute("SELECT MAX(id) FROM apprequests"))[0][0]
         if not last_id:
             last_id = 0
-        sql = "INSERT INTO apprequests(id, public_key, name, specifications, deadline, reward, currency, min_validators, notary_signature, block_validators) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        sql = "INSERT INTO apprequests(id, public_key, name, specifications, deadline, reward, currency, min_reviews, notary_signature, block_validators) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['name']), database_blob(tx['specifications']),
-                           tx['deadline'], tx['reward'], database_blob(tx['currency']), tx['min_validators'], database_blob(tx['notary_signature']), 0))
+                           tx['deadline'], tx['reward'], database_blob(tx['currency']), tx['min_reviews'], database_blob(tx['notary_signature']), 0))
         self.commit()
 
     def get_app_requests(self):
@@ -133,11 +133,11 @@ class DAppCrowdDatabase(Database):
         self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['apprequest_id']), database_blob(tx['apprequest_pk']), database_blob(tx['submission']), 0))
         self.commit()
 
-    def get_submissions(self, apprequest_id, apprequest_pk):
+    def get_submissions(self):
         """
-        Get all submission for a specific app request.
+        Get all submission
         """
-        submissions = list(self.execute("SELECT * FROM submissions WHERE apprequest_id = ? AND apprequest_pk = ?", (database_blob(apprequest_id), database_blob(apprequest_pk))))
+        submissions = list(self.execute("SELECT * FROM submissions"))
         submissions_list = []
         for submission in submissions:
             submission_dict = {

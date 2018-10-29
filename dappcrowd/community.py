@@ -81,11 +81,12 @@ class DAppCrowdCommunity(Community, BlockListener):
 
         # Challenge successful, create TrustChain block
         tx = {
+            'platform': 'github',
             'username': username,
             'followers': profile_info['followers']
         }
 
-        self.trustchain.create_source_block(block_type='dappcrowd_github', transaction=tx)
+        self.trustchain.create_source_block(block_type='dappcrowd_connection', transaction=tx)
 
     def unload(self):
         super(DAppCrowdCommunity, self).unload()

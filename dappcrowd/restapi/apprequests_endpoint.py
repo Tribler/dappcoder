@@ -20,16 +20,11 @@ class AppRequestsEndpoint(DAppCrowdEndpoint):
         Initiate a new app request.
         """
         parameters = http.parse_qs(request.content.read(), 1)
-        required_params = ['name', 'specifications', 'deadline', 'reward', 'currency', 'min_validators']
+        required_params = ['name', 'specifications', 'deadline', 'reward', 'currency', 'min_reviews']
         for required_param in required_params:
             if required_param not in parameters:
                 request.setResponseCode(http.BAD_REQUEST)
                 return json.dumps({"error": "missing parameter %s" % required_param})
-
-        # Step 1: upload the specifications/tests in IPFS
-        specs_pointer = self.ipfs_api.add(parameters['specifications'][0])['Hash']
-        if 'tests' in parameters:
-            self.ipfs_api.add(parameters['test'][0])
 
         # TODO: notary signature! Contact third-party provider...
         # TODO add tests
@@ -38,11 +33,11 @@ class AppRequestsEndpoint(DAppCrowdEndpoint):
         trustchain = self.get_trustchain()
         tx = {
             'name': parameters['name'][0],
-            'specifications': specs_pointer,
+            'specifications': parameters['specifications'][0],
             'deadline': parameters['deadline'][0],
             'reward': parameters['reward'][0],
             'currency': parameters['currency'][0],
-            'min_validators': parameters['min_validators'][0],
+            'min_reviews': parameters['min_reviews'][0],
             'notary_signature': '0' * 64
         }
 
