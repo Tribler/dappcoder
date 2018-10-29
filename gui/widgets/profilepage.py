@@ -41,4 +41,4 @@ class ProfilePage(QWidget):
         self.window().profile_verified_label.hide()
 
         request_manager = RequestManager()
-        request_manager.perform_request("dappcrowd/users/%s" % public_key.encode('hex'), self.on_user_info)
+        request_manager.perform_request("dappcrowd/users/%s" % public_key, self.on_user_info)
