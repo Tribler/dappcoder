@@ -63,8 +63,9 @@ class TestDAppCrowdCommunity(TestBase):
         self.assertTrue(skills)
 
         # Peer 2 endorses peer 1 now
-        a = yield self.nodes[1].overlay.trustchain.endorse_skill(peer1_pub_key, skills[0]['block_num'])
+        block, _ = yield self.nodes[1].overlay.trustchain.endorse_skill(peer1_pub_key, skills[0]['block_num'])
         yield self.deliver_messages()
+        self.assertTrue(self.nodes[1].overlay.trustchain.persistence.did_endorse_skill(block))
 
         skills = self.nodes[0].overlay.trustchain.persistence.get_skills(peer1_pub_key)
         self.assertEqual(skills[0]['endorsements'], 1)

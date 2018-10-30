@@ -19,6 +19,10 @@ class DAppCrowdTrustchainCommunity(TrustChainCommunity):
                                  'c1570a31ae72'))
     DB_CLASS = DAppCrowdTrustChainDatabase
 
+    def __init__(self, *args, **kwargs):
+        super(DAppCrowdTrustchainCommunity, self).__init__(*args, **kwargs)
+        self.persistence.my_peer = self.my_peer
+
     def get_github_profile(self, username):
         """
         Get the GitHub profile for a given username.
@@ -37,11 +41,13 @@ class DAppCrowdTrustchainCommunity(TrustChainCommunity):
         # Challenge successful, create TrustChain block
         tx = {
             'platform': 'github',
-            'username': username,
-            'followers': profile_info['followers']
+            'info': {
+                'username': username,
+                'followers': profile_info['followers']
+            }
         }
 
-        self.create_source_block(block_type='devid_skill', transaction=tx)
+        return self.create_source_block(block_type='devid_connection', transaction=tx)
 
     def add_skill(self, name):
         """

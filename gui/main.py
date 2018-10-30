@@ -45,6 +45,7 @@ class DAppCrowdWindow(QMainWindow):
         # Initialize pages
         self.make_app_request_page.initialize()
         self.users_page.initialize()
+        self.profile_page.initialize()
 
         self.notifications_panel = NotificationsPanel(self)
         self.notifications_panel.resize(300, 150)

@@ -4,6 +4,10 @@ from pyipv8.ipv8.database import database_blob
 
 class DAppCrowdTrustChainDatabase(TrustChainDB):
 
+    def __init__(self, working_directory, db_name):
+        super(DAppCrowdTrustChainDatabase, self).__init__(working_directory, db_name)
+        self.my_peer = None
+
     def get_pending_review_requests(self, public_key):
         """
         Get all pending review requests for/from a given public key.
@@ -19,17 +23,17 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         """
         Return whether the user is verified or not (imported GitHub profile).
         """
-        blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
+        blocks = self.get_blocks_with_type(block_type='devid_connection', public_key=public_key)
         return len(blocks) > 0
 
     def get_username(self, public_key):
         """
         Return the username of a given public key, or unknown if he/she did not import an existing profile.
         """
-        blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
+        blocks = self.get_blocks_with_type(block_type='devid_connection', public_key=public_key)
         if not blocks:
             return 'unknown'
-        return blocks[0].transaction['username']
+        return blocks[0].transaction['info']['username']
 
     def get_detailled_user_info(self, public_key):
         """
@@ -38,14 +42,11 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         github_info = None
         bitbucket_info = None
 
-        imported_profiles_blocks = self.get_blocks_with_type(block_type='dappcoder_connection', public_key=public_key)
+        imported_profiles_blocks = self.get_blocks_with_type(block_type='devid_connection', public_key=public_key)
         if imported_profiles_blocks:
             for profile_block in imported_profiles_blocks:
                 if profile_block.transaction['platform'] == 'github' and not github_info:
-                    github_info = {
-                        'username': profile_block.transaction['username'],
-                        'followers': profile_block.transaction['followers']
-                    }
+                    github_info = profile_block.transaction['info']
                 # TODO BITBUCKET
 
         return {
@@ -54,7 +55,8 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
             "username": self.get_username(public_key),
             "skills": self.get_skills(public_key),
             "github_info": github_info,
-            "bitbucket_info": bitbucket_info
+            "bitbucket_info": bitbucket_info,
+            "mid": self.my_peer.mid.encode('hex')
         }
 
     def get_users_list(self):
@@ -78,6 +80,16 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         """
         return len(self._getall("WHERE type='devid_skill' AND link_public_key = ? AND link_sequence_number = ?", (database_blob(skill_block.public_key), skill_block.sequence_number)))
 
+    def did_endorse_skill(self, skill_block):
+        """
+        Return whether you endorsed this skill already or not
+        """
+        if skill_block.public_key == self.my_peer.public_key.key_to_bin():
+            return True
+
+        return len(self._getall("WHERE type='devid_skill' AND public_key =? AND link_public_key = ? AND link_sequence_number = ?",
+                                (database_blob(self.my_peer.public_key.key_to_bin()), database_blob(skill_block.public_key), skill_block.sequence_number))) > 0
+
     def get_skills(self, public_key):
         """
         Get all skills of a specific user.
@@ -88,6 +100,7 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
             skills_list.append({
                 "name": skill_block.transaction['name'],
                 "block_num": skill_block.sequence_number,
-                "endorsements": self.get_num_endorsements(skill_block)
+                "endorsements": self.get_num_endorsements(skill_block),
+                "did_endorse": self.did_endorse_skill(skill_block)
             })
         return skills_list

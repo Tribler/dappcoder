@@ -22,10 +22,28 @@ class UsersEndpoint(DAppCrowdEndpoint):
 
 class MyProfileEndpoint(DAppCrowdEndpoint):
 
+    def __init__(self, ipv8, ipfs_api):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.putChild("skills", MyProfileSkillsEndpoint(ipv8, ipfs_api))
+
     def render_GET(self, request):
         trustchain = self.get_trustchain()
         my_pub_key = trustchain.my_peer.public_key.key_to_bin()
         return json.dumps({"profile": trustchain.persistence.get_detailled_user_info(my_pub_key)})
+
+
+class MyProfileSkillsEndpoint(DAppCrowdEndpoint):
+
+    def render_PUT(self, request):
+        parameters = http.parse_qs(request.content.read(), 1)
+        if 'name' not in parameters:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "missing name parameter"})
+
+        trustchain = self.get_trustchain()
+        trustchain.add_skill(parameters['name'][0])
+
+        return json.dumps({"success": True})
 
 
 class SpecificUserEndpoint(DAppCrowdEndpoint):
@@ -33,6 +51,7 @@ class SpecificUserEndpoint(DAppCrowdEndpoint):
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.putChild("timeline", SpecificUserTimelineEndpoint(ipv8, ipfs_api, pub_key))
+        self.putChild("skills", SpecificUserSkillsEndpoint(ipv8, ipfs_api, pub_key))
         self.pub_key = pub_key
 
     def render_GET(self, request):
@@ -70,3 +89,23 @@ class SpecificUserTimelineEndpoint(DAppCrowdEndpoint):
                 review_info['type'] = 'dappcrowd_review'
 
         return json.dumps({"timeline": timeline_list})
+
+
+class SpecificUserSkillsEndpoint(DAppCrowdEndpoint):
+
+    def __init__(self, ipv8, ipfs_api, pub_key):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.pub_key = pub_key
+
+    def render_PUT(self, request):
+        parameters = http.parse_qs(request.content.read(), 1)
+        required_params = ['public_key', 'block_num']
+        for required_param in required_params:
+            if required_param not in parameters:
+                request.setResponseCode(http.BAD_REQUEST)
+                return json.dumps({"error": "missing parameter %s" % required_param})
+
+        trustchain = self.get_trustchain()
+        trustchain.endorse_skill(parameters['public_key'][0].decode('hex'), parameters['block_num'][0])
+
+        return json.dumps({"success": True})

@@ -35,6 +35,6 @@ class GithubImportEndpoint(DAppCrowdEndpoint):
             request.write(json.dumps({"error": failure.getErrorMessage()}))
             request.finish()
 
-        self.get_dappcrowd_overlay().import_github_profile(username).addCallbacks(on_block_created, on_error)
+        self.get_trustchain().import_github_profile(username).addCallbacks(on_block_created, on_error)
 
         return NOT_DONE_YET
