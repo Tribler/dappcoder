@@ -68,45 +68,12 @@ class SpecificUserEndpoint(DAppCrowdEndpoint):
 
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
-        self.putChild("timeline", SpecificUserTimelineEndpoint(ipv8, ipfs_api, pub_key))
         self.putChild("skills", SpecificUserSkillsEndpoint(ipv8, ipfs_api, pub_key))
         self.pub_key = pub_key
 
     def render_GET(self, request):
         trustchain = self.get_trustchain()
         return json.dumps({"user": trustchain.persistence.get_detailled_user_info(self.pub_key.decode('hex'))})
-
-
-class SpecificUserTimelineEndpoint(DAppCrowdEndpoint):
-
-    def __init__(self, ipv8, ipfs_api, pub_key):
-        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
-        self.pub_key = pub_key
-
-    def render_GET(self, request):
-        trustchain = self.get_trustchain()
-        blocks_of_user = trustchain.persistence._getall(u"WHERE public_key = ?", (database_blob(self.pub_key.decode('hex')),))
-        blocks_of_user = sorted(blocks_of_user, reverse=True, key=lambda block: block.timestamp)
-        timeline_list = []
-
-        for block in blocks_of_user:
-            if block.type == 'dappcrowd_github':
-                timeline_list.append({
-                    "type": "github_import",
-                    "username": block.transaction['username']
-                })
-            elif block.type == 'dappcrowd_apprequest':
-                apprequest_info = block.transaction
-                apprequest_info['type'] = 'dappcrowd_apprequest'
-                timeline_list.append(apprequest_info)
-            elif block.type == 'dappcrowd_submission':
-                submission_info = block.transaction
-                submission_info['type'] = 'dappcrowd_submission'
-            elif block.type == 'dappcrowd_review':
-                review_info = block.transaction
-                review_info['type'] = 'dappcrowd_review'
-
-        return json.dumps({"timeline": timeline_list})
 
 
 class SpecificUserSkillsEndpoint(DAppCrowdEndpoint):

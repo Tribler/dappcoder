@@ -57,7 +57,7 @@
     <number>5</number>
    </property>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="time_label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -124,7 +124,7 @@ border-radius: 2px;ge</string>
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QToolButton" name="toolButton">
         <property name="minimumSize">
          <size>
           <width>36</width>
@@ -138,14 +138,14 @@ border-radius: 2px;ge</string>
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">border-radius: 4px;</string>
+         <string notr="true">border: none; border-radius: 4px;</string>
         </property>
         <property name="text">
-         <string/>
+         <string>...</string>
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/profile1.jpg</normaloff>images/profile1.jpg</iconset>
+          <normaloff>../images/default_profile.png</normaloff>../images/default_profile.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -165,14 +165,14 @@ border-radius: 2px;ge</string>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>5</width>
+          <width>10</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_14">
+       <widget class="QLabel" name="main_text_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>

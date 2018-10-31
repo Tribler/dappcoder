@@ -65,6 +65,7 @@ class DAppCrowdWindow(QMainWindow):
         self.top_menu_users_button.clicked.connect(self.on_top_bar_users_button_clicked)
         self.user_profile_button.clicked.connect(self.on_user_profile_button_clicked)
         self.left_menu_list.itemClicked.connect(self.on_left_menu_item_clicked)
+        self.app_name_button.clicked.connect(self.on_app_name_button_clicked)
 
         self.stackedWidget.setCurrentIndex(TIMELINE_PAGE)
 
@@ -75,6 +76,10 @@ class DAppCrowdWindow(QMainWindow):
         self.left_menu.hide()
         self.top_menu_button.hide()
         self.stackedWidget.hide()
+
+    def on_app_name_button_clicked(self):
+        self.load_timeline()
+        self.stackedWidget.setCurrentIndex(TIMELINE_PAGE)
 
     def on_left_menu_item_clicked(self):
         selected_items = self.left_menu_list.selectedItems()
@@ -212,13 +217,18 @@ class DAppCrowdWindow(QMainWindow):
         request_manager = RequestManager()
         request_manager.perform_request("dappcrowd/projects", self.on_my_projects)
 
-    def load_timeline(self):
-        for _ in range(0, 2):
+    def on_timeline_info(self, data):
+        self.timeline_list.clear()
+        for timeline_item in data['timeline']:
             item = QListWidgetItem()
             item.setSizeHint(QSize(-1, 80))
-            widget_item = TimelineItem(self.timeline_list)
+            widget_item = TimelineItem(self.timeline_list, timeline_item)
             self.timeline_list.addItem(item)
             self.timeline_list.setItemWidget(item, widget_item)
+
+    def load_timeline(self):
+        request_manager = RequestManager()
+        request_manager.perform_request("dappcrowd/timeline", self.on_timeline_info)
 
     def resizeEvent(self, _):
         self.resize_event.emit()

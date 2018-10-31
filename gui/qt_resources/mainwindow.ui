@@ -221,7 +221,7 @@ background-color: #222;
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="app_name">
+        <widget class="QToolButton" name="app_name_button">
          <property name="cursor">
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
@@ -229,13 +229,11 @@ background-color: #222;
           <string notr="true">color: white;
 font-size: 24px;
 font-weight: bold;
-font-family: &quot;Arial&quot;;</string>
+font-family: &quot;Arial&quot;;
+border: none;</string>
          </property>
          <property name="text">
           <string>DAppCoder</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1745,8 +1743,8 @@ font-size: 14px;
                           <rect>
                            <x>0</x>
                            <y>0</y>
-                           <width>286</width>
-                           <height>118</height>
+                           <width>16</width>
+                           <height>16</height>
                           </rect>
                          </property>
                         </widget>

@@ -13,11 +13,13 @@ class RootEndpoint(resource.Resource):
         from dappcrowd.restapi.reviews_endpoint import ReviewsEndpoint
         from dappcrowd.restapi.users_endpoint import UsersEndpoint
         from dappcrowd.restapi.github_endpoint import GithubEndpoint
+        from dappcrowd.restapi.timeline_endpoint import TimelineEndpoint
         self.putChild("projects", ProjectsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("submissions", SubmissionsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("reviews", ReviewsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("users", UsersEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("github", GithubEndpoint(self.ipv8, self.ipfs_api))
+        self.putChild("timeline", TimelineEndpoint(self.ipv8, self.ipfs_api))
 
 
 class DAppCrowdEndpoint(resource.Resource):
