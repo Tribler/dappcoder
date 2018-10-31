@@ -370,7 +370,7 @@ color: #f2f2f2;
 font-size: 14px;</string>
          </property>
          <property name="text">
-          <string>App Requests</string>
+          <string>Projects</string>
          </property>
         </widget>
        </item>
@@ -403,6 +403,9 @@ font-size: 14px;</string>
            <width>30</width>
            <height>30</height>
           </size>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
           <string notr="true">border: none;
@@ -551,6 +554,9 @@ border: none;
            <property name="focusPolicy">
             <enum>Qt::NoFocus</enum>
            </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
           </widget>
          </item>
         </layout>
@@ -578,7 +584,7 @@ border: none;
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="home_page">
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -681,7 +687,7 @@ border: none;
              <string notr="true">font-weight: bold; font-size: 15px; margin-left: 7px;</string>
             </property>
             <property name="text">
-             <string>Create a new application request</string>
+             <string>Create a new project</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -694,7 +700,7 @@ border: none;
              <string notr="true">margin-left: 7px;</string>
             </property>
             <property name="text">
-             <string>On this page, you can create a new request for an application. Please specify the application specifications in the fields below.</string>
+             <string>On this page, you can start a project. Please specify the project specifications in the fields below.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -728,7 +734,7 @@ border-radius: 4px;
 color: white;</string>
                </property>
                <property name="placeholderText">
-                <string>Application name</string>
+                <string>Project name</string>
                </property>
               </widget>
              </item>
@@ -747,21 +753,27 @@ border-radius: 4px;
 color: white;</string>
                </property>
                <property name="placeholderText">
-                <string>Specifications</string>
+                <string>Project specifications</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
               <widget class="QPushButton" name="create_app_request_button">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
-                 <width>180</width>
+                 <width>120</width>
                  <height>24</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>180</width>
+                 <width>120</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -777,7 +789,7 @@ font-weight: bold;
 font-size: 12px;</string>
                </property>
                <property name="text">
-                <string>Create application request</string>
+                <string>Create project</string>
                </property>
               </widget>
              </item>
@@ -1054,16 +1066,16 @@ border-radius: 2px;</string>
                     <number>0</number>
                    </property>
                    <property name="leftMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="topMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="rightMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="bottomMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <item>
                     <widget class="QLabel" name="label_6">
@@ -1076,19 +1088,17 @@ border-radius: 2px;</string>
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>26</height>
+                       <height>30</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
-                       <height>26</height>
+                       <height>30</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">border: none
-;margin: 5px;
-font-weight: bold;</string>
+                      <string notr="true">font-weight: bold</string>
                      </property>
                      <property name="text">
                       <string>GitHub account info</string>
@@ -1121,7 +1131,7 @@ margin: 5px;</string>
                    <item>
                     <widget class="QWidget" name="github_info_container" native="true">
                      <property name="styleSheet">
-                      <string notr="true">border: none;</string>
+                      <string notr="true">border: none; margin: 2px;</string>
                      </property>
                      <layout class="QFormLayout" name="formLayout_3">
                       <property name="formAlignment">
@@ -1289,19 +1299,17 @@ border-radius: 2px;</string>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
-                          <height>26</height>
+                          <height>30</height>
                          </size>
                         </property>
                         <property name="maximumSize">
                          <size>
                           <width>16777215</width>
-                          <height>26</height>
+                          <height>30</height>
                          </size>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">border: none
-;margin: 5px;
-font-weight: bold;</string>
+                         <string notr="true">font-weight: bold</string>
                         </property>
                         <property name="text">
                          <string>DAppCoder Statistics</string>
@@ -1375,15 +1383,9 @@ font-weight: bold;</string>
                    </sizepolicy>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">QWidget {
-background-color: #fbfbfb;
+                   <string notr="true">background-color: #fbfbfb;
 border: 1px solid #bbb;
-border-radius: 2px;
-}
-
-QLabel {
-border: none;
-}</string>
+border-radius: 2px;</string>
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout_6">
                    <property name="leftMargin">
@@ -1409,19 +1411,17 @@ border: none;
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>26</height>
+                       <height>30</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
-                       <height>26</height>
+                       <height>30</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">border: none
-;margin: 5px;
-font-weight: bold;</string>
+                      <string notr="true">font-weight: bold;</string>
                      </property>
                      <property name="text">
                       <string>BitBucket account info</string>
@@ -1606,7 +1606,7 @@ border: none;
 font-weight: bold;</string>
                         </property>
                         <property name="text">
-                         <string>Skills</string>
+                         <string>Development Skills</string>
                         </property>
                        </widget>
                       </item>
@@ -1700,6 +1700,486 @@ font-size: 14px;
           </item>
          </layout>
         </widget>
+        <widget class="ProjectPage" name="project_page">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="widget_9" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">font-weight: bold; font-size: 15px; margin-left: 7px;</string>
+               </property>
+               <property name="text">
+                <string>Project overview</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="project_add_submission_button">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border: none;
+border-radius: 4px;
+background-color: rgb(41, 173, 60);
+color: white;
+font-weight: bold;
+font-size: 12px;</string>
+               </property>
+               <property name="text">
+                <string>+ Add submission</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTabWidget" name="project_tab_widget">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="tab">
+             <attribute name="title">
+              <string>Overview</string>
+             </attribute>
+             <layout class="QFormLayout" name="formLayout_4">
+              <property name="fieldGrowthPolicy">
+               <enum>QFormLayout::ExpandingFieldsGrow</enum>
+              </property>
+              <property name="formAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string>Name:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="project_name_label">
+                <property name="text">
+                 <string>-</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Deadline:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="project_deadline_label">
+                <property name="text">
+                 <string>-</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>Specifications:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPlainTextEdit" name="plainTextEdit"/>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tab_2">
+             <attribute name="title">
+              <string>Submissions</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QListWidget" name="project_submissions_list"/>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="CreateSubmissionPage" name="make_submission_page">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font-weight: bold; font-size: 15px; margin-left: 7px;</string>
+            </property>
+            <property name="text">
+             <string>Add submission to project '...'</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_11" native="true">
+            <layout class="QFormLayout" name="formLayout_5">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::ExpandingFieldsGrow</enum>
+             </property>
+             <property name="formAlignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_16">
+               <property name="text">
+                <string>Your submission</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="make_submission_button">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>24</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>130</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>130</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border: none;
+border-radius: 4px;
+background-color: rgb(41, 173, 60);
+color: white;
+font-weight: bold;
+font-size: 12px;</string>
+               </property>
+               <property name="text">
+                <string>Create submission</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPlainTextEdit" name="submission_input">
+               <property name="styleSheet">
+                <string notr="true">background-color: #888;
+border-radius: 4px;
+color: white;</string>
+               </property>
+               <property name="placeholderText">
+                <string>Your submission</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="SubmissionPage" name="submission_page">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="widget_12" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">font-weight: bold; font-size: 15px; margin-left: 7px;</string>
+               </property>
+               <property name="text">
+                <string>Submission overview</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="submission_add_review_button">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border: none;
+border-radius: 4px;
+background-color: rgb(41, 173, 60);
+color: white;
+font-weight: bold;
+font-size: 12px;</string>
+               </property>
+               <property name="text">
+                <string>Review submission</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_13">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+            <zorder>label</zorder>
+            <zorder>submission_add_review_button</zorder>
+            <zorder>horizontalSpacer_13</zorder>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_13" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="QTabWidget" name="tabWidget">
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <widget class="QWidget" name="tab_3">
+                <attribute name="title">
+                 <string>Overview</string>
+                </attribute>
+               </widget>
+               <widget class="QWidget" name="tab_4">
+                <attribute name="title">
+                 <string>Reviews</string>
+                </attribute>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
+                 <item>
+                  <widget class="QListWidget" name="listWidget"/>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -1725,6 +2205,24 @@ font-size: 14px;
    <class>ProfilePage</class>
    <extends>QWidget</extends>
    <header>gui.widgets.profilepage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ProjectPage</class>
+   <extends>QWidget</extends>
+   <header>gui.widgets.projectpage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CreateSubmissionPage</class>
+   <extends>QWidget</extends>
+   <header>gui.widgets.createsubmissionpage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SubmissionPage</class>
+   <extends>QWidget</extends>
+   <header>gui.widgets.submissionpage.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

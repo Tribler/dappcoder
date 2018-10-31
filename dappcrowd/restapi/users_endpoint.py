@@ -25,6 +25,8 @@ class MyProfileEndpoint(DAppCrowdEndpoint):
     def __init__(self, ipv8, ipfs_api):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.putChild("skills", MyProfileSkillsEndpoint(ipv8, ipfs_api))
+        self.putChild("submissions", MySubmissionsEndpoint(ipv8, ipfs_api))
+        self.putChild("reviews", MyReviewsEndpoint(ipv8, ipfs_api))
 
     def render_GET(self, request):
         trustchain = self.get_trustchain()
@@ -44,6 +46,22 @@ class MyProfileSkillsEndpoint(DAppCrowdEndpoint):
         trustchain.add_skill(parameters['name'][0])
 
         return json.dumps({"success": True})
+
+
+class MySubmissionsEndpoint(DAppCrowdEndpoint):
+
+    def render_GET(self, request):
+        my_public_key = self.get_trustchain().my_peer.public_key.key_to_bin()
+        my_submissions = self.get_dappcrowd_overlay().persistence.get_submissions_for_user(my_public_key)
+        return json.dumps({"submissions": my_submissions})
+
+
+class MyReviewsEndpoint(DAppCrowdEndpoint):
+
+    def render_GET(self, request):
+        my_public_key = self.get_trustchain().my_peer.public_key.key_to_bin()
+        my_reviews = self.get_dappcrowd_overlay().persistence.get_reviews_for_user(my_public_key)
+        return json.dumps({"reviews": my_reviews})
 
 
 class SpecificUserEndpoint(DAppCrowdEndpoint):

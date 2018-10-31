@@ -8,12 +8,12 @@ class RootEndpoint(resource.Resource):
         self.ipv8 = ipv8
         self.ipfs_api = ipfs_api
 
-        from dappcrowd.restapi.apprequests_endpoint import AppRequestsEndpoint
+        from dappcrowd.restapi.projects_endpoint import ProjectsEndpoint
         from dappcrowd.restapi.submissions_endpoint import SubmissionsEndpoint
         from dappcrowd.restapi.reviews_endpoint import ReviewsEndpoint
         from dappcrowd.restapi.users_endpoint import UsersEndpoint
         from dappcrowd.restapi.github_endpoint import GithubEndpoint
-        self.putChild("apprequests", AppRequestsEndpoint(self.ipv8, self.ipfs_api))
+        self.putChild("projects", ProjectsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("submissions", SubmissionsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("reviews", ReviewsEndpoint(self.ipv8, self.ipfs_api))
         self.putChild("users", UsersEndpoint(self.ipv8, self.ipfs_api))

@@ -26,4 +26,4 @@ class CreateRequestPage(QWidget):
 
         request_manager = RequestManager()
         post_data = str("name=%s&specifications=%s&deadline=%s&reward=%d&currency=%s&min_reviews=%d" % (name, specifications, deadline, reward, currency, min_reviews))
-        request_manager.perform_request("dappcrowd/apprequests", self.on_app_request_created, data=post_data, method="PUT")
+        request_manager.perform_request("dappcrowd/projects", self.on_app_request_created, data=post_data, method="PUT")

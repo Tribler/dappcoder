@@ -69,3 +69,54 @@ class TestDAppCrowdCommunity(TestBase):
 
         skills = self.nodes[0].overlay.trustchain.persistence.get_skills(peer1_pub_key)
         self.assertEqual(skills[0]['endorsements'], 1)
+
+    @inlineCallbacks
+    def test_create_project(self):
+        """
+        Test creating a project
+        """
+        yield self.nodes[0].overlay.create_project("test", "specpointer", "01-02-03", 300, "EUR", 5)
+        yield self.deliver_messages()
+
+        # Node 2 should know about this app request now
+        projects = self.nodes[1].overlay.persistence.get_projects()
+        self.assertTrue(projects)
+        self.assertEqual(projects[0]['id'], 1)
+
+    @inlineCallbacks
+    def test_create_submission(self):
+        """
+        Test making a submission for a project
+        """
+        yield self.nodes[0].overlay.create_project("test", "specpointer", "01-02-03", 300, "EUR", 5)
+        yield self.deliver_messages()
+
+        # Test making a submission for an unknown project
+        self.assertRaises(RuntimeError, self.nodes[1].overlay.create_submission, 'a', 3, 'test')
+
+        # Node 2 now makes a submission
+        project = self.nodes[1].overlay.persistence.get_projects()[0]
+        yield self.nodes[1].overlay.create_submission(project['public_key'].decode('hex'), project['id'], 'test')
+        yield self.deliver_messages()
+
+        # Node 1 should have received this submission and added it to the database
+        submissions = self.nodes[0].overlay.persistence.get_submissions()
+        self.assertTrue(submissions)
+
+    @inlineCallbacks
+    def test_create_review(self):
+        """
+        Test doing a review for some piece of code.
+        """
+        yield self.nodes[0].overlay.create_project("test", "specpointer", "01-02-03", 300, "EUR", 5)
+        yield self.deliver_messages()
+        project = self.nodes[1].overlay.persistence.get_projects()[0]
+        yield self.nodes[1].overlay.create_submission(project['public_key'].decode('hex'), project['id'], 'test')
+        yield self.deliver_messages()
+
+        # Do a review
+        submission = self.nodes[0].overlay.persistence.get_submissions()[0]
+        yield self.nodes[0].overlay.create_review(submission['public_key'].decode('hex'), submission['id'], 'test')
+        yield self.deliver_messages()
+
+        self.assertTrue(self.nodes[1].overlay.persistence.get_reviews(submission['public_key'].decode('hex'), submission['id']))

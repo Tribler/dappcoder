@@ -7,8 +7,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem
 
-from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE, \
-    APPREQUESTS_PAGE, PROFILE_PAGE
+from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE, PROFILE_PAGE, PROJECT_PAGE
 from gui.dialogs.confirmationdialog import ConfirmationDialog
 from gui.requestmanager import RequestManager
 from gui.widgets.leftmenuitem import LeftMenuItem
@@ -26,8 +25,9 @@ class DAppCrowdWindow(QMainWindow):
         RequestManager.window = self
 
         self.profile_info = None
-        self.my_app_requests = []
+        self.my_projects = []
         self.my_submissions = []
+        self.my_reviews = []
 
         # Initialize logging
         root = logging.getLogger()
@@ -46,6 +46,8 @@ class DAppCrowdWindow(QMainWindow):
         self.make_app_request_page.initialize()
         self.users_page.initialize()
         self.profile_page.initialize()
+        self.project_page.initialize()
+        self.make_submission_page.initialize()
 
         self.notifications_panel = NotificationsPanel(self)
         self.notifications_panel.resize(300, 150)
@@ -56,6 +58,7 @@ class DAppCrowdWindow(QMainWindow):
         self.top_menu_button.clicked.connect(self.on_top_bar_button_clicked)
         self.top_menu_users_button.clicked.connect(self.on_top_bar_users_button_clicked)
         self.user_profile_button.clicked.connect(self.on_user_profile_button_clicked)
+        self.left_menu_list.itemClicked.connect(self.on_left_menu_item_clicked)
 
         self.stackedWidget.setCurrentIndex(TIMELINE_PAGE)
 
@@ -65,6 +68,19 @@ class DAppCrowdWindow(QMainWindow):
 
         self.left_menu.hide()
         self.top_menu_button.hide()
+
+    def on_left_menu_item_clicked(self):
+        selected_items = self.left_menu_list.selectedItems()
+        if not selected_items:
+            return
+        selected_item = selected_items[0]
+        item_widget = self.left_menu_list.itemWidget(selected_item)
+        self.left_menu_list.clearSelection()
+        if isinstance(item_widget, LeftMenuHeaderItem):
+            pass
+        elif item_widget.type == LEFT_MENU_APPREQUEST_TYPE:
+            self.project_page.load_project(item_widget.data_dict['public_key'], item_widget.data_dict['id'])
+            self.stackedWidget.setCurrentIndex(PROJECT_PAGE)
 
     def on_my_profile(self, data):
         if not data:
@@ -103,37 +119,40 @@ class DAppCrowdWindow(QMainWindow):
     def on_top_bar_apprequests_button_clicked(self):
         self.stackedWdiget.setCurrentIndex(APPREQUESTS_PAGE)
 
-    def on_my_apprequests(self, data):
-        self.my_app_requests = []
-        for apprequest in data['apprequests']:
-            if apprequest['public_key'] == self.profile_info['public_key']:
-                self.my_app_requests.append(apprequest)
+    def on_my_projects(self, data):
+        self.my_projects = []
+        for project in data['projects']:
+            if project['public_key'] == self.profile_info['public_key']:
+                self.my_projects.append(project)
 
         self.redraw_left_menu()
 
         request_manager = RequestManager()
-        request_manager.perform_request("dappcrowd/submissions", self.on_my_submissions)
+        request_manager.perform_request("dappcrowd/users/myprofile/submissions", self.on_my_submissions)
 
     def on_my_submissions(self, data):
-        for submission in data['submissions']:
-            if submission['public_key'] == self.profile_info['public_key']:
-                self.my_submissions.append(submission)
-
+        self.my_submissions = data['submissions']
         self.redraw_left_menu()
 
-        # TODO fetch reviews
+        request_manager = RequestManager()
+        request_manager.perform_request("dappcrowd/users/myprofile/reviews", self.on_my_reviews)
+
+    def on_my_reviews(self, data):
+        self.my_reviews = data['reviews']
+        self.redraw_left_menu()
 
     def redraw_left_menu(self):
         self.left_menu_list.clear()
 
-        # My app requests header
+        # My Projects header
         header_item = QListWidgetItem()
         header_item.setSizeHint(QSize(-1, 40))
         widget_item = LeftMenuHeaderItem(self.left_menu_list, LEFT_MENU_APPREQUEST_TYPE)
+        widget_item.main_title_label.setText("My Projects")
         self.left_menu_list.addItem(header_item)
         self.left_menu_list.setItemWidget(header_item, widget_item)
 
-        for apprequest in self.my_app_requests:
+        for apprequest in self.my_projects:
             item = QListWidgetItem()
             item.setSizeHint(QSize(-1, 32))
             widget_item = LeftMenuItem(self.left_menu_list, LEFT_MENU_APPREQUEST_TYPE, apprequest)
@@ -161,13 +180,20 @@ class DAppCrowdWindow(QMainWindow):
         header_item.setSizeHint(QSize(-1, 40))
         widget_item = LeftMenuHeaderItem(self.left_menu_list, LEFT_MENU_REVIEW_TYPE)
         widget_item.main_title_label.setText("My Reviews")
-        widget_item.new_button.hide()
         self.left_menu_list.addItem(header_item)
         self.left_menu_list.setItemWidget(header_item, widget_item)
 
+        for review in self.my_reviews:
+            item = QListWidgetItem()
+            item.setSizeHint(QSize(-1, 32))
+            widget_item = LeftMenuItem(self.left_menu_list, LEFT_MENU_REVIEW_TYPE, review)
+            widget_item.detail_label.setText("3/10 reviews")
+            self.left_menu_list.addItem(item)
+            self.left_menu_list.setItemWidget(item, widget_item)
+
     def load_left_menu(self):
         request_manager = RequestManager()
-        request_manager.perform_request("dappcrowd/apprequests", self.on_my_apprequests)
+        request_manager.perform_request("dappcrowd/projects", self.on_my_projects)
 
     def load_timeline(self):
         for _ in range(0, 2):

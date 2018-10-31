@@ -40,7 +40,7 @@ class DAppCrowdDatabase(Database):
         Return the schema for the database.
         """
         return u"""
-        CREATE TABLE IF NOT EXISTS apprequests(
+        CREATE TABLE IF NOT EXISTS projects(
         id                 INTEGER NOT NULL,
         public_key         TEXT NOT NULL,
         name               TEXT NOT NULL,
@@ -50,7 +50,6 @@ class DAppCrowdDatabase(Database):
         currency           TEXT NOT NULL,
         min_reviews        INTEGER NOT NULL,
         notary_signature   TEXT NOT NULL,
-        block_validators   INTEGER NOT NULL,
         
          PRIMARY KEY (id, public_key)
          );
@@ -58,10 +57,9 @@ class DAppCrowdDatabase(Database):
          CREATE TABLE IF NOT EXISTS submissions(
          id                 INTEGER NOT NULL,
          public_key         TEXT NOT NULL,
-         apprequest_id      INTEGER NOT NULL,
-         apprequest_pk      TEXT NOT NULL,
+         project_id         INTEGER NOT NULL,
+         project_pk         TEXT NOT NULL,
          submission         TEXT NOT NULL,
-         num_reviews        INTEGER NOT NULL,
          
          PRIMARY KEY (id, public_key)
          );
@@ -88,23 +86,29 @@ class DAppCrowdDatabase(Database):
         """
         return None
 
-    def add_app_request(self, block):
+    def get_next_project_id(self, public_key):
         """
-        Add an app request to the database, from a given block
+        Get the next project ID for a given public key.
         """
-        tx = block.transaction
-        last_id = list(self.execute("SELECT MAX(id) FROM apprequests"))[0][0]
+        last_id = list(self.execute("SELECT MAX(id) FROM projects WHERE public_key = ?", (database_blob(public_key),)))[0][0]
         if not last_id:
             last_id = 0
-        sql = "INSERT INTO apprequests(id, public_key, name, specifications, deadline, reward, currency, min_reviews, notary_signature, block_validators) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['name']), database_blob(tx['specifications']),
-                           tx['deadline'], tx['reward'], database_blob(tx['currency']), tx['min_reviews'], database_blob(tx['notary_signature']), 0))
+        return last_id + 1
+
+    def add_project(self, block):
+        """
+        Add a project to the database, from a given block
+        """
+        tx = block.transaction
+        sql = "INSERT INTO projects(id, public_key, name, specifications, deadline, reward, currency, min_reviews, notary_signature) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        self.execute(sql, (tx['id'], database_blob(block.public_key), database_blob(tx['name']), database_blob(tx['specifications']),
+                           tx['deadline'], tx['reward'], database_blob(tx['currency']), tx['min_reviews'], database_blob(tx['notary_signature'])))
         self.commit()
 
-    def get_app_requests(self):
-        app_requests = list(self.execute("SELECT * FROM apprequests;"))
-        requests_list = []
-        for app_request in app_requests:
+    def get_projects(self):
+        projects = list(self.execute("SELECT * FROM projects;"))
+        projects_list = []
+        for app_request in projects:
             request_dict = {
                 "id": app_request[0],
                 "public_key": str(app_request[1]).encode('hex'),
@@ -113,13 +117,41 @@ class DAppCrowdDatabase(Database):
                 "deadline": app_request[4],
                 "reward": app_request[5],
                 "currency": str(app_request[6]),
-                "min_validators": app_request[7],
+                "min_reviews": app_request[7],
                 "notary_signature": str(app_request[8]).encode('hex'),
-                "block_validators": app_request[9]
             }
-            requests_list.append(request_dict)
+            projects_list.append(request_dict)
 
-        return requests_list
+        return projects_list
+
+    def get_project(self, project_pk, project_id):
+        if not self.has_project(project_pk, project_id):
+            return None
+
+        project = list(self.execute("SELECT * FROM projects WHERE id = ? AND public_key = ?", (project_id, database_blob(project_pk))))[0]
+        return {
+            "id": project[0],
+            "public_key": str(project[1]).encode('hex'),
+            "name": str(project[2]),
+            "specifications": str(project[3]),
+            "deadline": project[4],
+            "reward": project[5],
+            "currency": str(project[6]),
+            "min_reviews": project[7],
+            "notary_signature": str(project[8]).encode('hex'),
+        }
+
+    def has_project(self, public_key, request_id):
+        return len(list(self.execute("SELECT * FROM projects WHERE id = ? and public_key = ?", (request_id, database_blob(public_key))))) > 0
+
+    def get_next_submission_id(self, public_key):
+        """
+        Get the next submission ID for a given public key.
+        """
+        last_id = list(self.execute("SELECT MAX(id) FROM submissions WHERE public_key = ?", (database_blob(public_key),)))[0][0]
+        if not last_id:
+            last_id = 0
+        return last_id + 1
 
     def add_submission(self, block):
         """
@@ -129,46 +161,75 @@ class DAppCrowdDatabase(Database):
         last_id = list(self.execute("SELECT MAX(id) FROM submissions"))[0][0]
         if not last_id:
             last_id = 0
-        sql = "INSERT INTO submissions(id, public_key, apprequest_id, apprequest_pk, submission, num_reviews) VALUES(?, ?, ?, ?, ?, ?)"
-        self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['apprequest_id']), database_blob(tx['apprequest_pk']), database_blob(tx['submission']), 0))
+        sql = "INSERT INTO submissions(id, public_key, project_id, project_pk, submission) VALUES(?, ?, ?, ?, ?)"
+        self.execute(sql, (last_id + 1, database_blob(block.public_key), tx['project_id'], database_blob(tx['project_pk']), database_blob(tx['submission'])))
         self.commit()
 
-    def get_submissions(self):
+    def has_submission(self, public_key, submission_id):
+        return len(list(self.execute("SELECT * FROM submissions WHERE id = ? and public_key = ?", (submission_id, database_blob(public_key))))) > 0
+
+    def get_submissions_for_user(self, public_key):
         """
-        Get all submission
+        Get submissions for a specific user
         """
-        submissions = list(self.execute("SELECT * FROM submissions"))
+        submissions = list(self.execute("SELECT * FROM submissions WHERE public_key = ?", (database_blob(public_key), )))
         submissions_list = []
         for submission in submissions:
             submission_dict = {
                 "id": submission[0],
                 "public_key": str(submission[1]).encode('hex'),
-                "apprequest_id": int(submission[2]),
-                "apprequest_pk": str(submission[3]).encode('hex'),
+                "project_id": int(submission[2]),
+                "project_pk": str(submission[3]).encode('hex'),
                 "submission": str(submission[4]),
-                "num_reviews": submission[5]
             }
             submissions_list.append(submission_dict)
 
         return submissions_list
+
+    def get_reviews_for_user(self, public_key):
+        """
+        Get reviews for a specific user
+        """
+        reviews = list(self.execute("SELECT * FROM reviews WHERE public_key = ?", (database_blob(public_key), )))
+        reviews_list = []
+        for review in reviews_list:
+            review_dict = {
+                "id": review[0],
+                "public_key": str(review[1]).encode('hex'),
+                "submission_id": int(review[2]),
+                "submission_pk": str(review[3]).encode('hex'),
+                "review": str(review[4]),
+            }
+            reviews_list.append(review_dict)
+
+        return reviews_list
+
+    def get_next_review_id(self, public_key):
+        """
+        Get the next review ID for a given public key.
+        """
+        last_id = list(self.execute("SELECT MAX(id) FROM reviews WHERE public_key = ?", (database_blob(public_key),)))[0][0]
+        if not last_id:
+            last_id = 0
+        return last_id + 1
 
     def add_review(self, block):
         """
         Add a review to the database, from a given block
         """
         tx = block.transaction
-        last_id = list(self.execute("SELECT MAX(id) FROM reviews"))[0][0]
-        if not last_id:
-            last_id = 0
         sql = "INSERT INTO reviews(id, public_key, submission_id, submission_pk, review) VALUES(?, ?, ?, ?, ?)"
-        self.execute(sql, (last_id + 1, database_blob(block.public_key), database_blob(tx['submission_id']), database_blob(tx['submission_pk']), database_blob(tx['review'])))
+        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['submission_id'], database_blob(tx['submission_pk']), database_blob(tx['review'])))
         self.commit()
 
-    def get_reviews(self, submission_id, submission_pk):
+    def has_review(self, public_key, review_id):
+        return len(list(self.execute("SELECT * FROM reviews WHERE id = ? and public_key = ?", (review_id, database_blob(public_key))))) > 0
+
+    def get_reviews(self, submission_pk, submission_id):
         """
         Get all reviews for a specific submission.
         """
-        reviews = list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ?", (database_blob(submission_id), database_blob(submission_pk))))
+        reviews = list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ?", (submission_id, database_blob(submission_pk))))
         reviews_list = []
         for review in reviews:
             submission_dict = {

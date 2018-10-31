@@ -9,7 +9,7 @@ from gui.widgets.useritem import UserItem
 class UsersPage(QWidget):
 
     def initialize(self):
-        self.window().users_list.itemSelectionChanged.connect(self.on_item_clicked)
+        self.window().users_list.itemClicked.connect(self.on_item_clicked)
 
     def on_users(self, data):
         self.window().users_list.clear()

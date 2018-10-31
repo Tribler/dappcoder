@@ -82,7 +82,7 @@ class DAppCrowdCommunity(Community, BlockListener):
 
         self.persistence = DAppCrowdDatabase(working_directory, 'dappcrowd')
 
-        self.trustchain.add_listener(self, ['dappcrowd_review_request'])
+        self.trustchain.add_listener(self, ['dappcoder_project', 'dappcoder_submission', 'dappcoder_review'])
 
     def should_sign(self, block):
         if block.type == 'dappcrowd_review_request':
@@ -90,7 +90,56 @@ class DAppCrowdCommunity(Community, BlockListener):
         return True
 
     def received_block(self, block):
-        pass
+        if block.type == 'dappcoder_project' and not self.persistence.has_project(block.public_key, block.transaction['id']):
+            self.persistence.add_project(block)
+        if block.type == 'dappcoder_submission' and not self.persistence.has_submission(block.public_key, block.transaction['id']):
+            self.persistence.add_submission(block)
+        if block.type == 'dappcoder_review' and not self.persistence.has_review(block.public_key, block.transaction['id']):
+            self.persistence.add_review(block)
+
+    def create_project(self, name, specifications, deadline, reward, currency, min_reviews):
+        """
+        Create a new project.
+        """
+        tx = {
+            'id': self.persistence.get_next_project_id(self.trustchain.my_peer.public_key.key_to_bin()),
+            'name': name,
+            'specifications': specifications,
+            'deadline': deadline,
+            'reward': reward,
+            'currency': currency,
+            'min_reviews': min_reviews,
+            'notary_signature': 'a' * 64,
+        }
+        return self.trustchain.create_source_block(block_type='dappcoder_project', transaction=tx)
+
+    def create_submission(self, project_public_key, project_id, submission):
+        """
+        Create a submission for a given project.
+        """
+        if not self.persistence.has_project(project_public_key, project_id):
+            raise RuntimeError("This project does not exist.")
+        # TODO check deadline expiration!
+
+        tx = {
+            'project_pk': project_public_key,
+            'project_id': project_id,
+            'id': self.persistence.get_next_submission_id(self.trustchain.my_peer.public_key.key_to_bin()),
+            'submission': submission
+        }
+        return self.trustchain.create_source_block(block_type='dappcoder_submission', transaction=tx)
+
+    def create_review(self, submission_public_key, submission_id, review):
+        """
+        Create a review for a given submission.
+        """
+        tx = {
+            'submission_pk': submission_public_key,
+            'submission_id': submission_id,
+            'id': self.persistence.get_next_review_id(self.trustchain.my_peer.public_key.key_to_bin()),
+            'review': review
+        }
+        return self.trustchain.create_source_block(block_type='dappcoder_review', transaction=tx)
 
     def request_review(self, submission_id, requester_pub_key):
         """

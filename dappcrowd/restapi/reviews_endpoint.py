@@ -34,24 +34,13 @@ class ReviewsEndpoint(DAppCrowdEndpoint):
                 request.setResponseCode(http.BAD_REQUEST)
                 return json.dumps({"error": "missing parameter %s" % required_param})
 
-        # Step 1: upload the review to IPFS
-        specs_pointer = self.ipfs_api.add(parameters['review'][0])['Hash']
-
-        # Step 2: publish it on TrustChain
-        trustchain = self.get_trustchain()
-        tx = {
-            'submission_pk': parameters['submission_pk'][0],
-            'submission_id': parameters['submission_id'][0],
-            'review': specs_pointer
-        }
-
         def on_block_created(blocks):
             dappcrowd_overlay = self.get_dappcrowd_overlay()
             dappcrowd_overlay.persistence.add_review(blocks[0])
             request.write(json.dumps({"success": True}))
             request.finish()
 
-        trustchain.create_source_block(block_type='dappcrowd_review', transaction=tx).addCallback(on_block_created)
+        self.get_dappcrowd_overlay().create_review(parameters['submission_pk'][0], parameters['submission_id'][0], parameters['review'][0]).addCallback(on_block_created)
 
         return NOT_DONE_YET
 
