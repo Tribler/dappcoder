@@ -129,8 +129,10 @@ class DappCrowdServiceMaker(object):
         self.ipv8.overlays.append(dappcrowd_tc_community)
         self.ipv8.strategies.append((RandomWalk(dappcrowd_tc_community), 20))
 
+        self.ipfs_api = ipfsapi.connect('127.0.0.1', 5001)
+
         dappcrowd_community = DAppCrowdCommunity(my_peer, self.ipv8.endpoint, self.ipv8.network,
-                                                 trustchain=dappcrowd_tc_community)
+                                                 trustchain=dappcrowd_tc_community, ipfs_api=self.ipfs_api)
         self.ipv8.overlays.append(dappcrowd_community)
         self.ipv8.strategies.append((RandomWalk(dappcrowd_community), 20))
 
@@ -146,8 +148,6 @@ class DappCrowdServiceMaker(object):
         signal.signal(signal.SIGTERM, signal_handler)
 
         msg("Starting DAppCrowd")
-
-        self.ipfs_api = ipfsapi.connect('127.0.0.1', 5001)
 
         self.restapi = RESTManager(self.ipv8)
         self.restapi.start(options["apiport"])

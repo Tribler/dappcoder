@@ -78,9 +78,10 @@ class DAppCrowdCommunity(Community, BlockListener):
     def __init__(self, *args, **kwargs):
         working_directory = kwargs.pop('working_directory', '')
         self.trustchain = kwargs.pop('trustchain')
+        self.ipfs_api = kwargs.pop('ipfs_api')
         super(DAppCrowdCommunity, self).__init__(*args, **kwargs)
 
-        self.persistence = DAppCrowdDatabase(working_directory, 'dappcrowd')
+        self.persistence = DAppCrowdDatabase(working_directory, 'dappcrowd', self.ipfs_api)
         self.persistence.my_peer = self.my_peer
 
         self.trustchain.add_listener(self, ['dappcoder_project', 'dappcoder_submission', 'dappcoder_review'])
@@ -102,10 +103,14 @@ class DAppCrowdCommunity(Community, BlockListener):
         """
         Create a new project.
         """
+
+        # Add specifications to IPFS
+        pointer = self.ipfs_api.add_json({"specifications": specifications})
+
         tx = {
             'id': self.persistence.get_next_project_id(self.trustchain.my_peer.public_key.key_to_bin()),
             'name': name,
-            'specifications': specifications,
+            'specifications': pointer,
             'deadline': deadline,
             'reward': reward,
             'currency': currency,
@@ -122,11 +127,14 @@ class DAppCrowdCommunity(Community, BlockListener):
             raise RuntimeError("This project does not exist.")
         # TODO check deadline expiration!
 
+        # Add submission to IPFS
+        pointer = self.ipfs_api.add_json({"submission": submission})
+
         tx = {
             'project_pk': project_public_key,
             'project_id': project_id,
             'id': self.persistence.get_next_submission_id(self.trustchain.my_peer.public_key.key_to_bin()),
-            'submission': submission
+            'submission': pointer
         }
         return self.trustchain.create_source_block(block_type='dappcoder_submission', transaction=tx)
 
@@ -134,11 +142,15 @@ class DAppCrowdCommunity(Community, BlockListener):
         """
         Create a review for a given submission.
         """
+
+        # Add review to IPFS
+        pointer = self.ipfs_api.add_json({"review": review})
+
         tx = {
             'submission_pk': submission_public_key,
             'submission_id': submission_id,
             'id': self.persistence.get_next_review_id(self.trustchain.my_peer.public_key.key_to_bin()),
-            'review': review
+            'review': pointer
         }
         return self.trustchain.create_source_block(block_type='dappcoder_review', transaction=tx)
 

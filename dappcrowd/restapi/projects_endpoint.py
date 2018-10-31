@@ -29,11 +29,8 @@ class ProjectsEndpoint(DAppCrowdEndpoint):
                 request.setResponseCode(http.BAD_REQUEST)
                 return json.dumps({"error": "missing parameter %s" % required_param})
 
-        # TODO: notary signature! Contact third-party provider...
-        # TODO add tests
-
         def on_block_created(blocks):
-            request.write(json.dumps({"success": True}))
+            request.write(json.dumps({"success": True, "id": blocks[0].transaction['id']}))
             request.finish()
 
         self.get_dappcrowd_overlay().create_project(parameters['name'][0], parameters['specifications'][0],

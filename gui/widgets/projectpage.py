@@ -16,6 +16,7 @@ class ProjectPage(QWidget):
     def on_add_submission_clicked(self):
         self.window().make_submission_page.active_project_pk = self.active_project_pk
         self.window().make_submission_page.active_project_id = self.active_project_id
+        self.window().add_submission_header_label.setText("Add submission to job '%s'" % self.window().project_name_label.text())
         self.window().stackedWidget.setCurrentIndex(ADD_SUBMISSION_PAGE)
 
     def initialize(self):
@@ -49,6 +50,7 @@ class ProjectPage(QWidget):
     def on_project_info(self, data):
         self.window().project_name_label.setText(data['project']['name'])
         self.window().project_deadline_label.setText(data['project']['deadline'])
+        self.window().project_specifications_label.setPlainText(data['project']['specifications'].decode('hex'))
 
         if data['project']['public_key'] == self.window().profile_info['public_key'] or data['project']['made_submission']:
             self.window().project_add_submission_button.setEnabled(False)

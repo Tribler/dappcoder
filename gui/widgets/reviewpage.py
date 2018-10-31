@@ -18,7 +18,7 @@ class ReviewPage(QWidget):
         self.window().stackedWidget.setCurrentIndex(SUBMISSION_PAGE)
 
     def on_review_info(self, data):
-        print data
+        self.window().review_text_input.setPlainText(data['review']['review'].decode('hex'))
 
     def load_review(self, review_pk, review_id):
         self.active_review_pk = review_pk

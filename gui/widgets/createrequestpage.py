@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 
+from gui import PROJECT_PAGE
 from gui.dialogs.confirmationdialog import ConfirmationDialog
 from gui.requestmanager import RequestManager
 
@@ -16,9 +17,14 @@ class CreateRequestPage(QWidget):
 
         self.window().load_left_menu()
 
+        self.window().project_page.load_project(self.window().profile_info['public_key'], data['id'])
+        self.window().project_back_container.hide()
+        self.window().stackedWidget.setCurrentIndex(PROJECT_PAGE)
+        ConfirmationDialog.show_error(self.window(), "Success", "Your job has been created!")
+
     def on_create_app_request_clicked(self):
         name = self.window().create_app_request_name_input.text()
-        specifications = self.window().create_app_request_specifications_input.toPlainText()
+        specifications = self.window().create_app_request_specifications_input.toPlainText().encode('hex')
         deadline = "2018-12-01"
         reward = 300
         currency = "EUR"

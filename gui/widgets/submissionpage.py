@@ -50,6 +50,8 @@ class SubmissionPage(QWidget):
         else:
             self.window().submission_add_review_button.setEnabled(True)
 
+        self.window().submission_text_input.setPlainText(data['submission']['submission'].decode('hex'))
+
         request_manager = RequestManager()
         request_manager.perform_request("dappcrowd/submissions/%s/%d/reviews" % (self.active_submission_pk, self.active_submission_id), self.on_reviews)
 

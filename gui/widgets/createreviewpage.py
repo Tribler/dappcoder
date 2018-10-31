@@ -30,5 +30,6 @@ class CreateReviewPage(QWidget):
 
     def on_create_review_clicked(self):
         request_manager = RequestManager()
-        post_data = str("submission_pk=%s&submission_id=%s&review=test" % (self.active_submission_pk, self.active_submission_id))
+        review_text = self.window().review_input.toPlainText().encode('hex')
+        post_data = str("submission_pk=%s&submission_id=%s&review=%s" % (self.active_submission_pk, self.active_submission_id, review_text))
         request_manager.perform_request("dappcrowd/reviews", self.on_review_created, data=post_data, method="PUT")

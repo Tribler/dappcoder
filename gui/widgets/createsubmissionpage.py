@@ -26,9 +26,11 @@ class CreateSubmissionPage(QWidget):
 
         self.window().load_left_menu()
         self.window().stackedWidget.setCurrentIndex(PROJECT_PAGE)
+        self.window().project_add_submission_button.setEnabled(False)
         ConfirmationDialog.show_error(self.window(), "Success", "Your submission has been created!")
 
     def on_create_submission_clicked(self):
         request_manager = RequestManager()
-        post_data = str("project_pk=%s&project_id=%s&submission=test" % (self.active_project_pk, self.active_project_id))
+        submission_text = self.window().submission_input.toPlainText().encode('hex')
+        post_data = str("project_pk=%s&project_id=%s&submission=%s" % (self.active_project_pk, self.active_project_id, submission_text))
         request_manager.perform_request("dappcrowd/submissions", self.on_submission_created, data=post_data, method="PUT")

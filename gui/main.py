@@ -74,6 +74,7 @@ class DAppCrowdWindow(QMainWindow):
 
         self.left_menu.hide()
         self.top_menu_button.hide()
+        self.stackedWidget.hide()
 
     def on_left_menu_item_clicked(self):
         selected_items = self.left_menu_list.selectedItems()
@@ -105,6 +106,7 @@ class DAppCrowdWindow(QMainWindow):
         self.profile_info = data["profile"]
         self.left_menu.show()
         self.top_menu_button.show()
+        self.stackedWidget.show()
 
         self.load_left_menu()
         self.load_timeline()

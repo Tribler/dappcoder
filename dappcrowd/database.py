@@ -19,7 +19,7 @@ class DAppCrowdDatabase(Database):
     """
     LATEST_DB_VERSION = 1
 
-    def __init__(self, working_directory, db_name):
+    def __init__(self, working_directory, db_name, ipfs_api):
         """
         Sets up the persistence layer ready for use.
         :param working_directory: Path to the working directory
@@ -33,6 +33,7 @@ class DAppCrowdDatabase(Database):
         super(DAppCrowdDatabase, self).__init__(db_path)
         self._logger.debug("DAppCrowd database path: %s", db_path)
         self.db_name = db_name
+        self.ipfs_api = ipfs_api
         self.open()
         self.my_peer = None
 
@@ -118,11 +119,12 @@ class DAppCrowdDatabase(Database):
             return None
 
         project = list(self.execute("SELECT * FROM projects WHERE id = ? AND public_key = ?", (project_id, database_blob(project_pk))))[0]
+        specifications_text = self.ipfs_api.get_json(str(project[3]))["specifications"]
         return {
             "id": project[0],
             "public_key": str(project[1]).encode('hex'),
             "name": str(project[2]),
-            "specifications": str(project[3]),
+            "specifications": specifications_text,
             "deadline": project[4],
             "reward": project[5],
             "currency": str(project[6]),
@@ -175,14 +177,15 @@ class DAppCrowdDatabase(Database):
             return None
 
         submission = list(self.execute("SELECT * FROM submissions WHERE id = ? AND public_key = ?", (submission_id, database_blob(submission_pk))))[0]
-        project = self.get_project(str(submission[1]), int(submission[2]))
+        submission_text = self.ipfs_api.get_json(str(submission[4]))["submission"]
+        project = self.get_project(str(submission[3]), int(submission[2]))
         return {
             "id": submission[0],
             "public_key": str(submission[1]).encode('hex'),
             "project_id": int(submission[2]),
             "project_pk": str(submission[3]).encode('hex'),
             "project_name": project['name'],
-            "submission": str(submission[4]),
+            "submission": submission_text,
             "num_reviews": self.get_num_reviews(str(submission[1]), int(submission[2])),
             "min_reviews": project['min_reviews'],
             "did_review": self.did_review(submission_pk, submission_id)
@@ -245,13 +248,14 @@ class DAppCrowdDatabase(Database):
 
         review = list(self.execute("SELECT * FROM reviews WHERE id = ? AND public_key = ?", (review_id, database_blob(review_pk))))[0]
         submission = self.get_submission(str(review[3]), review[2])
+        review_text = self.ipfs_api.get_json(str(review[4]))["review"]
         project = self.get_project(submission['project_pk'].decode('hex'), submission['project_id'])
         return {
             "id": review[0],
             "public_key": str(review[1]).encode('hex'),
             "submission_id": int(review[2]),
             "submission_pk": str(review[3]).encode('hex'),
-            "review": str(review[4]),
+            "review": review_text,
             "project_name": project['name']
         }
 
