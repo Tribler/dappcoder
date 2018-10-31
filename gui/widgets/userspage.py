@@ -25,4 +25,10 @@ class UsersPage(QWidget):
         request_manager.perform_request("dappcrowd/users", self.on_users)
 
     def on_item_clicked(self):
+        selected_item = self.window().users_list.selectedItems()[0]
+        item_widget = self.window().users_list.itemWidget(selected_item)
+        self.window().users_list.clearSelection()
+
+        self.window().profile_page.load_user(item_widget.user_dict['public_key'])
+        self.window().profile_back_container.show()
         self.window().stackedWidget.setCurrentIndex(PROFILE_PAGE)

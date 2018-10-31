@@ -14,6 +14,10 @@ class CreateSubmissionPage(QWidget):
 
     def initialize(self):
         self.window().make_submission_button.clicked.connect(self.on_create_submission_clicked)
+        self.window().add_submission_back_button.clicked.connect(self.on_back_button_clicked)
+
+    def on_back_button_clicked(self):
+        self.window().stackedWidget.setCurrentIndex(PROJECT_PAGE)
 
     def on_submission_created(self, data):
         if not data or 'success' not in data or not data['success']:

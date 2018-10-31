@@ -34,6 +34,7 @@ class DAppCrowdDatabase(Database):
         self._logger.debug("DAppCrowd database path: %s", db_path)
         self.db_name = db_name
         self.open()
+        self.my_peer = None
 
     def get_schema(self):
         """
@@ -108,20 +109,8 @@ class DAppCrowdDatabase(Database):
     def get_projects(self):
         projects = list(self.execute("SELECT * FROM projects;"))
         projects_list = []
-        for app_request in projects:
-            request_dict = {
-                "id": app_request[0],
-                "public_key": str(app_request[1]).encode('hex'),
-                "name": str(app_request[2]),
-                "specifications": str(app_request[3]),
-                "deadline": app_request[4],
-                "reward": app_request[5],
-                "currency": str(app_request[6]),
-                "min_reviews": app_request[7],
-                "notary_signature": str(app_request[8]).encode('hex'),
-            }
-            projects_list.append(request_dict)
-
+        for project in projects:
+            projects_list.append(self.get_project(str(project[1]), project[0]))
         return projects_list
 
     def get_project(self, project_pk, project_id):
@@ -139,10 +128,17 @@ class DAppCrowdDatabase(Database):
             "currency": str(project[6]),
             "min_reviews": project[7],
             "notary_signature": str(project[8]).encode('hex'),
+            "made_submission": self.made_submission(str(project[1]), project[0])
         }
 
     def has_project(self, public_key, request_id):
         return len(list(self.execute("SELECT * FROM projects WHERE id = ? and public_key = ?", (request_id, database_blob(public_key))))) > 0
+
+    def made_submission(self, project_pk, project_id):
+        """
+        Return whether you have submitted to a project
+        """
+        return len(list(self.execute("SELECT * FROM submissions WHERE project_id = ? AND project_pk = ? AND public_key = ?", (project_id, database_blob(project_pk), database_blob(self.my_peer.public_key.key_to_bin()))))) > 0
 
     def get_next_submission_id(self, public_key):
         """
@@ -168,6 +164,30 @@ class DAppCrowdDatabase(Database):
     def has_submission(self, public_key, submission_id):
         return len(list(self.execute("SELECT * FROM submissions WHERE id = ? and public_key = ?", (submission_id, database_blob(public_key))))) > 0
 
+    def did_review(self, submission_pk, submission_id):
+        """
+        Return whether you have a review for a specific submission.
+        """
+        return len(list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ? AND public_key = ?", (submission_id, database_blob(submission_pk), database_blob(self.my_peer.public_key.key_to_bin()))))) > 0
+
+    def get_submission(self, submission_pk, submission_id):
+        if not self.has_submission(submission_pk, submission_id):
+            return None
+
+        submission = list(self.execute("SELECT * FROM submissions WHERE id = ? AND public_key = ?", (submission_id, database_blob(submission_pk))))[0]
+        project = self.get_project(str(submission[1]), int(submission[2]))
+        return {
+            "id": submission[0],
+            "public_key": str(submission[1]).encode('hex'),
+            "project_id": int(submission[2]),
+            "project_pk": str(submission[3]).encode('hex'),
+            "project_name": project['name'],
+            "submission": str(submission[4]),
+            "num_reviews": self.get_num_reviews(str(submission[1]), int(submission[2])),
+            "min_reviews": project['min_reviews'],
+            "did_review": self.did_review(submission_pk, submission_id)
+        }
+
     def get_submissions_for_user(self, public_key):
         """
         Get submissions for a specific user
@@ -175,15 +195,17 @@ class DAppCrowdDatabase(Database):
         submissions = list(self.execute("SELECT * FROM submissions WHERE public_key = ?", (database_blob(public_key), )))
         submissions_list = []
         for submission in submissions:
-            submission_dict = {
-                "id": submission[0],
-                "public_key": str(submission[1]).encode('hex'),
-                "project_id": int(submission[2]),
-                "project_pk": str(submission[3]).encode('hex'),
-                "submission": str(submission[4]),
-            }
-            submissions_list.append(submission_dict)
+            submissions_list.append(self.get_submission(str(submission[1]), int(submission[2])))
+        return submissions_list
 
+    def get_submissions_for_project(self, project_pk, project_id):
+        """
+        Get all submissions for a specific project.
+        """
+        submissions = list(self.execute("SELECT * FROM submissions WHERE project_pk = ? AND project_id = ?", (database_blob(project_pk), project_id)))
+        submissions_list = []
+        for submission in submissions:
+            submissions_list.append(self.get_submission(str(submission[1]), int(submission[2])))
         return submissions_list
 
     def get_reviews_for_user(self, public_key):
@@ -192,16 +214,8 @@ class DAppCrowdDatabase(Database):
         """
         reviews = list(self.execute("SELECT * FROM reviews WHERE public_key = ?", (database_blob(public_key), )))
         reviews_list = []
-        for review in reviews_list:
-            review_dict = {
-                "id": review[0],
-                "public_key": str(review[1]).encode('hex'),
-                "submission_id": int(review[2]),
-                "submission_pk": str(review[3]).encode('hex'),
-                "review": str(review[4]),
-            }
-            reviews_list.append(review_dict)
-
+        for review in reviews:
+            reviews_list.append(self.get_review(str(review[1]), review[0]))
         return reviews_list
 
     def get_next_review_id(self, public_key):
@@ -222,8 +236,24 @@ class DAppCrowdDatabase(Database):
         self.execute(sql, (tx['id'], database_blob(block.public_key), tx['submission_id'], database_blob(tx['submission_pk']), database_blob(tx['review'])))
         self.commit()
 
-    def has_review(self, public_key, review_id):
-        return len(list(self.execute("SELECT * FROM reviews WHERE id = ? and public_key = ?", (review_id, database_blob(public_key))))) > 0
+    def has_review(self, review_pk, review_id):
+        return len(list(self.execute("SELECT * FROM reviews WHERE id = ? and public_key = ?", (review_id, database_blob(review_pk))))) > 0
+
+    def get_review(self, review_pk, review_id):
+        if not self.has_review(review_pk, review_id):
+            return None
+
+        review = list(self.execute("SELECT * FROM reviews WHERE id = ? AND public_key = ?", (review_id, database_blob(review_pk))))[0]
+        submission = self.get_submission(str(review[3]), review[2])
+        project = self.get_project(submission['project_pk'].decode('hex'), submission['project_id'])
+        return {
+            "id": review[0],
+            "public_key": str(review[1]).encode('hex'),
+            "submission_id": int(review[2]),
+            "submission_pk": str(review[3]).encode('hex'),
+            "review": str(review[4]),
+            "project_name": project['name']
+        }
 
     def get_reviews(self, submission_pk, submission_id):
         """
@@ -232,16 +262,14 @@ class DAppCrowdDatabase(Database):
         reviews = list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ?", (submission_id, database_blob(submission_pk))))
         reviews_list = []
         for review in reviews:
-            submission_dict = {
-                "id": review[0],
-                "public_key": str(review[1]).encode('hex'),
-                "submission_id": int(review[2]),
-                "submission_pk": str(review[3]).encode('hex'),
-                "review": str(review[4]),
-            }
-            reviews_list.append(submission_dict)
-
+            reviews_list.append(self.get_review(str(review[1]), review[0]))
         return reviews_list
+
+    def get_num_reviews(self, submission_pk, submission_id):
+        """
+        Get the number of reviews for a specific submission.
+        """
+        return len(list(self.execute("SELECT * FROM reviews WHERE submission_id = ? AND submission_pk = ?", (submission_id, database_blob(submission_pk)))))
 
     def open(self, initial_statements=True, prepare_visioning=True):
         return super(DAppCrowdDatabase, self).open(initial_statements, prepare_visioning)

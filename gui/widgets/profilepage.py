@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 
-from gui import BUTTON_TYPE_NORMAL, BUTTON_TYPE_CONFIRM
+from gui import BUTTON_TYPE_NORMAL, BUTTON_TYPE_CONFIRM, USERS_PAGE
 from gui.dialogs.confirmationdialog import ConfirmationDialog
 from gui.requestmanager import RequestManager
 from gui.widgets.skillitem import SkillItem
@@ -17,6 +17,10 @@ class ProfilePage(QWidget):
     def initialize(self):
         self.window().add_skill_button.clicked.connect(self.on_add_skill_button_clicked)
         self.window().connect_github_button.clicked.connect(self.on_github_connect_clicked)
+        self.window().profile_back_button.clicked.connect(self.on_back_button_clicked)
+
+    def on_back_button_clicked(self):
+        self.window().stackedWidget.setCurrentIndex(USERS_PAGE)
 
     def on_github_connect_clicked(self):
         self.dialog = ConfirmationDialog(self.window(), "Connect GitHub with your DevID",

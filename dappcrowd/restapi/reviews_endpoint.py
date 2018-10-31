@@ -12,6 +12,9 @@ class ReviewsEndpoint(DAppCrowdEndpoint):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.putChild("request", RequestReviewEndpoint(ipv8, ipfs_api))
 
+    def getChild(self, path, request):
+        return ReviewPKEndpoint(self.ipv8, self.ipfs_api, path)
+
     def render_GET(self, request):
         """
         Get all reviews for a specific submission.
@@ -35,12 +38,10 @@ class ReviewsEndpoint(DAppCrowdEndpoint):
                 return json.dumps({"error": "missing parameter %s" % required_param})
 
         def on_block_created(blocks):
-            dappcrowd_overlay = self.get_dappcrowd_overlay()
-            dappcrowd_overlay.persistence.add_review(blocks[0])
             request.write(json.dumps({"success": True}))
             request.finish()
 
-        self.get_dappcrowd_overlay().create_review(parameters['submission_pk'][0], parameters['submission_id'][0], parameters['review'][0]).addCallback(on_block_created)
+        self.get_dappcrowd_overlay().create_review(parameters['submission_pk'][0].decode('hex'), parameters['submission_id'][0], parameters['review'][0]).addCallback(on_block_created)
 
         return NOT_DONE_YET
 
@@ -61,3 +62,30 @@ class RequestReviewEndpoint(DAppCrowdEndpoint):
         self.get_dappcrowd_overlay().request_review(parameters['submission_id'][0], parameters['requester_pk'][0])
 
         return json.dumps({"success": True})
+
+
+class ReviewPKEndpoint(DAppCrowdEndpoint):
+
+    def __init__(self, ipv8, ipfs_api, public_key):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.public_key = public_key.decode('hex')
+
+    def getChild(self, path, request):
+        return SpecificReviewEndpoint(self.ipv8, self.ipfs_api, self.public_key, path)
+
+
+class SpecificReviewEndpoint(DAppCrowdEndpoint):
+
+    def __init__(self, ipv8, ipfs_api, public_key, review_id):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.public_key = public_key
+        self.review_id = review_id
+
+    def render_GET(self, request):
+        if not self.get_dappcrowd_overlay().persistence.has_review(self.public_key, self.review_id):
+            request.setResponseCode(http.NOT_FOUND)
+            return json.dumps({"error": "the review is not found"})
+
+        return json.dumps({
+            "review": self.get_dappcrowd_overlay().persistence.get_review(self.public_key, self.review_id)
+        })

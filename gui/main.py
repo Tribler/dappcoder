@@ -7,7 +7,8 @@ from PyQt5 import uic
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QListWidgetItem
 
-from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE, PROFILE_PAGE, PROJECT_PAGE
+from gui import TIMELINE_PAGE, LEFT_MENU_APPREQUEST_TYPE, LEFT_MENU_SUBMISSION_TYPE, LEFT_MENU_REVIEW_TYPE, USERS_PAGE, \
+    PROFILE_PAGE, PROJECT_PAGE, PROJECTS_PAGE, SUBMISSION_PAGE, REVIEW_PAGE
 from gui.dialogs.confirmationdialog import ConfirmationDialog
 from gui.requestmanager import RequestManager
 from gui.widgets.leftmenuitem import LeftMenuItem
@@ -48,6 +49,10 @@ class DAppCrowdWindow(QMainWindow):
         self.profile_page.initialize()
         self.project_page.initialize()
         self.make_submission_page.initialize()
+        self.projects_page.initialize()
+        self.submission_page.initialize()
+        self.make_review_page.initialize()
+        self.review_page.initialize()
 
         self.notifications_panel = NotificationsPanel(self)
         self.notifications_panel.resize(300, 150)
@@ -56,6 +61,7 @@ class DAppCrowdWindow(QMainWindow):
 
         self.notifications_button.clicked.connect(self.on_notifications_button_clicked)
         self.top_menu_button.clicked.connect(self.on_top_bar_button_clicked)
+        self.top_menu_jobs_button.clicked.connect(self.on_top_bar_jobs_button_clicked)
         self.top_menu_users_button.clicked.connect(self.on_top_bar_users_button_clicked)
         self.user_profile_button.clicked.connect(self.on_user_profile_button_clicked)
         self.left_menu_list.itemClicked.connect(self.on_left_menu_item_clicked)
@@ -80,7 +86,16 @@ class DAppCrowdWindow(QMainWindow):
             pass
         elif item_widget.type == LEFT_MENU_APPREQUEST_TYPE:
             self.project_page.load_project(item_widget.data_dict['public_key'], item_widget.data_dict['id'])
+            self.window().project_back_container.hide()
             self.stackedWidget.setCurrentIndex(PROJECT_PAGE)
+        elif item_widget.type == LEFT_MENU_SUBMISSION_TYPE:
+            self.submission_page.load_submission(item_widget.data_dict['public_key'], item_widget.data_dict['id'])
+            self.window().submission_back_container.hide()
+            self.stackedWidget.setCurrentIndex(SUBMISSION_PAGE)
+        elif item_widget.type == LEFT_MENU_REVIEW_TYPE:
+            self.review_page.load_review(item_widget.data_dict['public_key'], item_widget.data_dict['id'])
+            self.window().review_back_container.hide()
+            self.stackedWidget.setCurrentIndex(REVIEW_PAGE)
 
     def on_my_profile(self, data):
         if not data:
@@ -112,12 +127,14 @@ class DAppCrowdWindow(QMainWindow):
         self.users_page.load_users()
 
     def on_user_profile_button_clicked(self):
+        self.window().profile_back_container.hide()
         self.stackedWidget.setCurrentIndex(PROFILE_PAGE)
         if self.profile_page.active_user != self.profile_info['public_key']:
             self.profile_page.load_user(self.profile_info['public_key'])
 
-    def on_top_bar_apprequests_button_clicked(self):
-        self.stackedWdiget.setCurrentIndex(APPREQUESTS_PAGE)
+    def on_top_bar_jobs_button_clicked(self):
+        self.stackedWidget.setCurrentIndex(PROJECTS_PAGE)
+        self.projects_page.load_jobs()
 
     def on_my_projects(self, data):
         self.my_projects = []
@@ -148,7 +165,7 @@ class DAppCrowdWindow(QMainWindow):
         header_item = QListWidgetItem()
         header_item.setSizeHint(QSize(-1, 40))
         widget_item = LeftMenuHeaderItem(self.left_menu_list, LEFT_MENU_APPREQUEST_TYPE)
-        widget_item.main_title_label.setText("My Projects")
+        widget_item.main_title_label.setText("My Jobs")
         self.left_menu_list.addItem(header_item)
         self.left_menu_list.setItemWidget(header_item, widget_item)
 
@@ -171,7 +188,6 @@ class DAppCrowdWindow(QMainWindow):
             item = QListWidgetItem()
             item.setSizeHint(QSize(-1, 32))
             widget_item = LeftMenuItem(self.left_menu_list, LEFT_MENU_SUBMISSION_TYPE, submission)
-            widget_item.detail_label.setText("3/10 reviews")
             self.left_menu_list.addItem(item)
             self.left_menu_list.setItemWidget(item, widget_item)
 
@@ -187,7 +203,6 @@ class DAppCrowdWindow(QMainWindow):
             item = QListWidgetItem()
             item.setSizeHint(QSize(-1, 32))
             widget_item = LeftMenuItem(self.left_menu_list, LEFT_MENU_REVIEW_TYPE, review)
-            widget_item.detail_label.setText("3/10 reviews")
             self.left_menu_list.addItem(item)
             self.left_menu_list.setItemWidget(item, widget_item)
 

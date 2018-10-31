@@ -59,6 +59,7 @@ class SpecificProjectEndpoint(DAppCrowdEndpoint):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.public_key = public_key
         self.project_id = project_id
+        self.putChild("submissions", SpecificProjectSubmissionsEndpoint(ipv8, ipfs_api, public_key, project_id))
 
     def render_GET(self, request):
         if not self.get_dappcrowd_overlay().persistence.has_project(self.public_key, self.project_id):
@@ -68,3 +69,18 @@ class SpecificProjectEndpoint(DAppCrowdEndpoint):
         return json.dumps({
             "project": self.get_dappcrowd_overlay().persistence.get_project(self.public_key, self.project_id)
         })
+
+
+class SpecificProjectSubmissionsEndpoint(DAppCrowdEndpoint):
+
+    def __init__(self, ipv8, ipfs_api, public_key, project_id):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.public_key = public_key
+        self.project_id = project_id
+
+    def render_GET(self, request):
+        if not self.get_dappcrowd_overlay().persistence.has_project(self.public_key, self.project_id):
+            request.setResponseCode(http.NOT_FOUND)
+            return json.dumps({"error": "the project is not found"})
+
+        return json.dumps({"submissions": self.get_dappcrowd_overlay().persistence.get_submissions_for_project(self.public_key, self.project_id)})
