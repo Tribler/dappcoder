@@ -81,7 +81,7 @@ class DAppCrowdCommunity(Community, BlockListener):
         self.ipfs_api = kwargs.pop('ipfs_api')
         super(DAppCrowdCommunity, self).__init__(*args, **kwargs)
 
-        self.persistence = DAppCrowdDatabase(working_directory, 'dappcrowd', self.ipfs_api)
+        self.persistence = DAppCrowdDatabase(working_directory, 'dappcrowd', self.ipfs_api, self.trustchain.persistence)
         self.persistence.my_peer = self.my_peer
 
         self.trustchain.add_listener(self, ['dappcoder_project', 'dappcoder_submission', 'dappcoder_review'])

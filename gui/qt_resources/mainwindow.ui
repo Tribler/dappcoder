@@ -610,7 +610,7 @@ border: none;
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>9</number>
         </property>
         <widget class="QWidget" name="home_page">
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -886,6 +886,9 @@ border: none;
 }
 QListWidget::item {
 border-bottom: 1px solid #bbb;
+}
+QListWidget::item::hover {
+background-color: #ccc;
 }</string>
             </property>
            </widget>
@@ -2025,7 +2028,7 @@ background-color: #bbb;
           <item>
            <widget class="QTabWidget" name="project_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="tab">
              <attribute name="title">
@@ -2107,12 +2110,18 @@ background-color: #bbb;
               </property>
               <item>
                <widget class="QListWidget" name="project_submissions_list">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="styleSheet">
                  <string notr="true">QWidget {
 border: none;
 }
 QListWidget::item {
 border-bottom: 1px solid #bbb;
+}
+QListWidget::item::hover {
+background-color: #ccc;
 }</string>
                 </property>
                </widget>
@@ -2349,7 +2358,7 @@ border-radius: 4px;
 color: white;</string>
                </property>
                <property name="placeholderText">
-                <string>Your submission</string>
+                <string>Please paste your submission here</string>
                </property>
               </widget>
              </item>
@@ -2618,7 +2627,7 @@ background-color: #bbb;
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QLabel" name="label_20">
+                  <widget class="QLabel" name="submission_detail_label">
                    <property name="styleSheet">
                     <string notr="true">margin: 5px;</string>
                    </property>
@@ -2661,12 +2670,18 @@ background-color: #bbb;
                  </property>
                  <item>
                   <widget class="QListWidget" name="submission_reviews_list">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
                    <property name="styleSheet">
                     <string notr="true">QWidget {
 border: none;
 }
 QListWidget::item {
 border-bottom: 1px solid #bbb;
+}
+QListWidget::item::hover {
+background-color: #ccc;
 }</string>
                    </property>
                   </widget>
@@ -2742,6 +2757,9 @@ border: none;
 }
 QListWidget::item {
 border-bottom: 1px solid #bbb;
+}
+QListWidget::item::hover {
+background-color: #ccc;
 }</string>
             </property>
            </widget>
@@ -2962,7 +2980,7 @@ font-weight: bold;
 font-size: 12px;</string>
                </property>
                <property name="text">
-                <string>Create review</string>
+                <string>Submit review</string>
                </property>
               </widget>
              </item>
@@ -3150,7 +3168,7 @@ color: white;</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_18">
+           <widget class="QLabel" name="review_details_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>

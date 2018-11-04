@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QListWidgetItem
 
 from gui import ADD_REVIEW_PAGE, REVIEW_PAGE, PROJECT_PAGE
 from gui.requestmanager import RequestManager
+from gui.util import pretty_date
 from gui.widgets.reviewitem import ReviewItem
 
 
@@ -50,6 +51,7 @@ class SubmissionPage(QWidget):
         else:
             self.window().submission_add_review_button.setEnabled(True)
 
+        self.window().submission_detail_label.setText("Submission made by %s (%s)" % (data['submission']['username'], pretty_date(data['submission']['timestamp'] / 1000)))
         self.window().submission_text_input.setPlainText(data['submission']['submission'].decode('hex'))
 
         request_manager = RequestManager()
@@ -60,3 +62,6 @@ class SubmissionPage(QWidget):
         self.active_submission_id = submission_id
         request_manager = RequestManager()
         request_manager.perform_request("dappcrowd/submissions/%s/%d" % (submission_pk, submission_id), self.on_submission_info)
+
+    def reload_submission(self):
+        self.load_submission(self.active_submission_pk, self.active_submission_id)

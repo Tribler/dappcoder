@@ -66,3 +66,6 @@ class ProjectPage(QWidget):
         self.active_project_id = project_id
         request_manager = RequestManager()
         request_manager.perform_request("dappcrowd/projects/%s/%d" % (project_pk, project_id), self.on_project_info)
+
+    def reload_project(self):
+        self.load_project(self.active_project_pk, self.active_project_id)

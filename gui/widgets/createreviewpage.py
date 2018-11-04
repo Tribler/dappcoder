@@ -26,6 +26,7 @@ class CreateReviewPage(QWidget):
 
         self.window().load_left_menu()
         self.window().stackedWidget.setCurrentIndex(SUBMISSION_PAGE)
+        self.window().submission_page.reload_submission()
         ConfirmationDialog.show_error(self.window(), "Success", "Your review has been created!")
 
     def on_create_review_clicked(self):

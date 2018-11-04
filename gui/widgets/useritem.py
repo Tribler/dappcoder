@@ -12,3 +12,6 @@ class UserItem(QWidget):
 
         self.user_dict = user_dict
         self.username_label.setText(self.user_dict['username'])
+
+        if not self.user_dict['verified']:
+            self.verified_label.hide()

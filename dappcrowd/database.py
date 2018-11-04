@@ -19,7 +19,7 @@ class DAppCrowdDatabase(Database):
     """
     LATEST_DB_VERSION = 1
 
-    def __init__(self, working_directory, db_name, ipfs_api):
+    def __init__(self, working_directory, db_name, ipfs_api, trustchain_db):
         """
         Sets up the persistence layer ready for use.
         :param working_directory: Path to the working directory
@@ -34,6 +34,7 @@ class DAppCrowdDatabase(Database):
         self._logger.debug("DAppCrowd database path: %s", db_path)
         self.db_name = db_name
         self.ipfs_api = ipfs_api
+        self.trustchain_db = trustchain_db
         self.open()
         self.my_peer = None
 
@@ -62,6 +63,7 @@ class DAppCrowdDatabase(Database):
          project_id         INTEGER NOT NULL,
          project_pk         TEXT NOT NULL,
          submission         TEXT NOT NULL,
+         submission_timestamp BIGINT NOT NULL,
          
          PRIMARY KEY (id, public_key)
          );
@@ -72,6 +74,7 @@ class DAppCrowdDatabase(Database):
          submission_id      INTEGER NOT NULL,
          submission_pk      TEXT NOT NULL,
          review             TEXT NOT NULL,
+         review_timestamp   BIGINT NOT NULL,
          
          PRIMARY KEY (id, public_key)
          );
@@ -166,8 +169,8 @@ class DAppCrowdDatabase(Database):
         Add a submission to the database, from a given block
         """
         tx = block.transaction
-        sql = "INSERT INTO submissions(id, public_key, project_id, project_pk, submission) VALUES(?, ?, ?, ?, ?)"
-        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['project_id'], database_blob(tx['project_pk']), database_blob(tx['submission'])))
+        sql = "INSERT INTO submissions(id, public_key, project_id, project_pk, submission, submission_timestamp) VALUES(?, ?, ?, ?, ?, ?)"
+        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['project_id'], database_blob(tx['project_pk']), database_blob(tx['submission']), block.timestamp))
         self.commit()
 
     def has_submission(self, public_key, submission_id):
@@ -189,13 +192,15 @@ class DAppCrowdDatabase(Database):
         return {
             "id": submission[0],
             "public_key": str(submission[1]).encode('hex'),
+            "username": self.trustchain_db.get_username(str(submission[1])),
             "project_id": int(submission[2]),
             "project_pk": str(submission[3]).encode('hex'),
             "project_name": project['name'],
             "submission": submission_text,
             "num_reviews": self.get_num_reviews(str(submission[1]), int(submission[0])),
             "min_reviews": project['min_reviews'],
-            "did_review": self.did_review(submission_pk, submission_id)
+            "did_review": self.did_review(submission_pk, submission_id),
+            "timestamp": submission[5]
         }
 
     def get_submissions_for_user(self, public_key):
@@ -242,8 +247,8 @@ class DAppCrowdDatabase(Database):
         Add a review to the database, from a given block
         """
         tx = block.transaction
-        sql = "INSERT INTO reviews(id, public_key, submission_id, submission_pk, review) VALUES(?, ?, ?, ?, ?)"
-        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['submission_id'], database_blob(tx['submission_pk']), database_blob(tx['review'])))
+        sql = "INSERT INTO reviews(id, public_key, submission_id, submission_pk, review, review_timestamp) VALUES(?, ?, ?, ?, ?, ?)"
+        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['submission_id'], database_blob(tx['submission_pk']), database_blob(tx['review']), block.timestamp))
         self.commit()
 
     def has_review(self, review_pk, review_id):
@@ -260,10 +265,12 @@ class DAppCrowdDatabase(Database):
         return {
             "id": review[0],
             "public_key": str(review[1]).encode('hex'),
+            "username": self.trustchain_db.get_username(str(review[1])),
             "submission_id": int(review[2]),
             "submission_pk": str(review[3]).encode('hex'),
             "review": review_text,
-            "project_name": project['name']
+            "project_name": project['name'],
+            "timestamp": review[5]
         }
 
     def get_reviews(self, submission_pk, submission_id):

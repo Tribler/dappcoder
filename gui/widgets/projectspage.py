@@ -26,7 +26,7 @@ class ProjectsPage(QWidget):
         self.window().jobs_list.clear()
         for project in data['projects']:
             item = QListWidgetItem()
-            item.setSizeHint(QSize(-1, 40))
+            item.setSizeHint(QSize(-1, 50))
             widget_item = JobItem(self.window().jobs_list, project)
             self.window().jobs_list.addItem(item)
             self.window().jobs_list.setItemWidget(item, widget_item)

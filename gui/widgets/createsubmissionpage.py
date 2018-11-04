@@ -27,6 +27,7 @@ class CreateSubmissionPage(QWidget):
         self.window().load_left_menu()
         self.window().stackedWidget.setCurrentIndex(PROJECT_PAGE)
         self.window().project_add_submission_button.setEnabled(False)
+        self.window().project_page.reload_project()
         ConfirmationDialog.show_error(self.window(), "Success", "Your submission has been created!")
 
     def on_create_submission_clicked(self):
