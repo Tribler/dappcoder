@@ -87,7 +87,7 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         if skill_block.public_key == self.my_peer.public_key.key_to_bin():
             return True
 
-        return len(self._getall("WHERE type='devid_skill' AND public_key =? AND link_public_key = ? AND link_sequence_number = ?",
+        return len(self._getall("WHERE type='devid_skill' AND public_key = ? AND link_public_key = ? AND link_sequence_number = ?",
                                 (database_blob(self.my_peer.public_key.key_to_bin()), database_blob(skill_block.public_key), skill_block.sequence_number))) > 0
 
     def get_skills(self, public_key):

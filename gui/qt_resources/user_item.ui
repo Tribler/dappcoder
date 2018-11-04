@@ -87,12 +87,14 @@
       </size>
      </property>
      <property name="styleSheet">
-      <string notr="true">border: 1px solid #bbb;
-border-radius: 4px;
-background-color: white;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../images/default_profile.png</normaloff>../images/default_profile.png</iconset>
      </property>
      <property name="iconSize">
       <size>

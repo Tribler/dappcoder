@@ -442,7 +442,7 @@ border-radius: 10px;</string>
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>../images/profile1.jpg</normaloff>../images/profile1.jpg</iconset>
+           <normaloff>../images/default_profile.png</normaloff>../images/default_profile.png</iconset>
          </property>
          <property name="iconSize">
           <size>
