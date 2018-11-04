@@ -95,7 +95,7 @@ class DAppCrowdTrustChainDatabase(TrustChainDB):
         Get all skills of a specific user.
         """
         skills_list = []
-        skill_blocks = self._getall("WHERE type='devid_skill' AND public_key = ?", (database_blob(public_key),))
+        skill_blocks = self._getall("WHERE type='devid_skill' AND public_key = ? AND link_sequence_number = 0", (database_blob(public_key),))
         for skill_block in skill_blocks:
             skills_list.append({
                 "name": skill_block.transaction['name'],
