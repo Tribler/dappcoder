@@ -24,3 +24,5 @@ class TimelineItem(QWidget):
             self.main_text_label.setText("%s imported a %s profile." % (user_part, self.item_dict['platform']))
         elif self.item_dict['type'] == 'added_skill':
             self.main_text_label.setText("%s added a skill (%s) to %s profile." % (user_part, self.item_dict['skill_name'], 'your' if is_you else 'their'))
+        elif self.item_dict['type'] == 'endorsement':
+            self.main_text_label.setText("%s endorsed user %s for skill '%s'." % (user_part, self.item_dict['endorsed_username'], self.item_dict['skill_name']))

@@ -38,12 +38,22 @@ class TimelineEndpoint(DAppCrowdEndpoint):
                     "job_name": submission['project_name']
                 })
             elif block.type == 'devid_skill':
-                timeline_list.append({
-                    "type": "added_skill",
-                    "public_key": block.public_key.encode('hex'),
-                    "username": self.get_trustchain().persistence.get_username(block.public_key),
-                    "timestamp": block.timestamp,
-                    "skill_name": block.transaction['name']
-                })
+                if block.link_sequence_number:
+                    timeline_list.append({
+                        "type": "endorsement",
+                        "public_key": block.public_key.encode('hex'),
+                        "username": self.get_trustchain().persistence.get_username(block.public_key),
+                        "endorsed_username": self.get_trustchain().persistence.get_username(block.link_public_key),
+                        "timestamp": block.timestamp,
+                        "skill_name": block.transaction['name']
+                    })
+                else:
+                    timeline_list.append({
+                        "type": "added_skill",
+                        "public_key": block.public_key.encode('hex'),
+                        "username": self.get_trustchain().persistence.get_username(block.public_key),
+                        "timestamp": block.timestamp,
+                        "skill_name": block.transaction['name']
+                    })
 
         return json.dumps({"timeline": timeline_list})
