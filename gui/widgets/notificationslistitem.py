@@ -8,4 +8,4 @@ class NotificationsListItem(QWidget):
 
     def __init__(self, parent):
         QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join('qt_resources', 'notification_list_item.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'notification_list_item.ui'), self)

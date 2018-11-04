@@ -8,6 +8,6 @@ class ReviewItem(QWidget):
 
     def __init__(self, parent, review_info):
         QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join('qt_resources', 'review_item.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'review_item.ui'), self)
 
         self.review_info = review_info

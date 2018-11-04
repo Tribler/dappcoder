@@ -16,7 +16,7 @@ class ConfirmationDialog(DialogContainer):
     def __init__(self, parent, title, main_text, buttons, show_input=False):
         DialogContainer.__init__(self, parent)
 
-        uic.loadUi(os.path.join('qt_resources', 'buttonsdialog.ui'), self.dialog_widget)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'buttonsdialog.ui'), self.dialog_widget)
 
         self.dialog_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 

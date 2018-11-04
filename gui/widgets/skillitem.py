@@ -12,7 +12,7 @@ class SkillItem(QWidget):
 
     def __init__(self, parent, profile_page, skill_info):
         QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join('qt_resources', 'skill_item.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'skill_item.ui'), self)
         self.profile_page = profile_page
         self.dialog = None
 

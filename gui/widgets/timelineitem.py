@@ -10,7 +10,7 @@ class TimelineItem(QWidget):
 
     def __init__(self, parent, item_dict):
         QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join('qt_resources', 'timeline_item.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'timeline_item.ui'), self)
 
         self.item_dict = item_dict
         self.time_label.setText(pretty_date(self.item_dict['timestamp'] / 1000))
