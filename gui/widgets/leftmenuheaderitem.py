@@ -10,7 +10,7 @@ class LeftMenuHeaderItem(QWidget):
 
     def __init__(self, parent, type):
         QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join('qt_resources', 'left_menu_header.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'left_menu_header.ui'), self)
 
         self.type = type
         if self.type == LEFT_MENU_SUBMISSION_TYPE or self.type == LEFT_MENU_REVIEW_TYPE:

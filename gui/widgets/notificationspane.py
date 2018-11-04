@@ -11,7 +11,7 @@ class NotificationsPanel(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
 
-        uic.loadUi(os.path.join('qt_resources', 'notifications.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'notifications.ui'), self)
 
     def load(self):
         # TODO use REST API

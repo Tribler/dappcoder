@@ -1,0 +1,2 @@
+ipfsapi
+PyQt5

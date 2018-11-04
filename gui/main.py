@@ -22,7 +22,7 @@ class DAppCrowdWindow(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        uic.loadUi(os.path.join('qt_resources', 'mainwindow.ui'), self)
+        uic.loadUi(os.path.join('gui', 'qt_resources', 'mainwindow.ui'), self)
         RequestManager.window = self
 
         self.profile_info = None
