@@ -15,7 +15,7 @@ class CreateRequestPage(QWidget):
             ConfirmationDialog.show_error(self.window(), "Error", "Error when creating the application request!")
             return
 
-        self.window().load_left_menu()
+        self.window().load_my_profile()
 
         self.window().project_page.load_project(self.window().profile_info['public_key'], data['id'])
         self.window().project_back_container.hide()

@@ -69,14 +69,18 @@ class DAppCrowdWindow(QMainWindow):
 
         self.stackedWidget.setCurrentIndex(TIMELINE_PAGE)
 
-        # Load your profile information first
-        request_manager = RequestManager()
-        request_manager.perform_request("dappcrowd/users/myprofile", self.on_my_profile)
+        self.load_my_profile()
 
         self.left_menu.hide()
         self.top_menu_button.hide()
         self.stackedWidget.hide()
         self.jobs_num_label.hide()
+        self.notifications_button.hide()
+
+    def load_my_profile(self):
+        # Load your profile information first
+        request_manager = RequestManager()
+        request_manager.perform_request("dappcrowd/users/myprofile", self.on_my_profile)
 
     def on_app_name_button_clicked(self):
         self.load_timeline()

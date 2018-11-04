@@ -49,15 +49,22 @@ class ProfilePage(QWidget):
 
     def on_add_skill_button_clicked(self):
         self.dialog = ConfirmationDialog(self.window(), "Add skill to your DevID", "Please enter the name of the skill you want to add to your DevID.", [('ADD', BUTTON_TYPE_CONFIRM), ('CLOSE', BUTTON_TYPE_NORMAL)], show_input=True)
+        self.dialog.dialog_widget.dialog_input.setPlaceholderText("Skill name")
         self.dialog.button_clicked.connect(self.on_add_skill_dialog_button_clicked)
         self.dialog.show()
 
     def on_add_skill_dialog_button_clicked(self, action):
         if action == 0:
-            # Add the skill
-            request_manager = RequestManager()
-            post_data = str("name=%s" % self.dialog.dialog_widget.dialog_input.text())
-            request_manager.perform_request("dappcrowd/users/myprofile/skills", self.on_skill_added, data=post_data, method="PUT")
+            skill_to_add = self.dialog.dialog_widget.dialog_input.text()
+            # Did we already add the skill?
+            is_added = skill_to_add in [skill['name'] for skill in self.user_data['user']['skills']]
+            if is_added:
+                ConfirmationDialog.show_error(self.window(), "Skill already added", "You already added this skill to your profile.")
+            else:
+                # Add the skill
+                request_manager = RequestManager()
+                post_data = str("name=%s" % skill_to_add)
+                request_manager.perform_request("dappcrowd/users/myprofile/skills", self.on_skill_added, data=post_data, method="PUT")
         self.dialog.close()
 
     def on_skill_added(self, data):
