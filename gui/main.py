@@ -76,6 +76,7 @@ class DAppCrowdWindow(QMainWindow):
         self.left_menu.hide()
         self.top_menu_button.hide()
         self.stackedWidget.hide()
+        self.jobs_num_label.hide()
 
     def on_app_name_button_clicked(self):
         self.load_timeline()
@@ -112,6 +113,8 @@ class DAppCrowdWindow(QMainWindow):
         self.left_menu.show()
         self.top_menu_button.show()
         self.stackedWidget.show()
+        self.jobs_num_label.show()
+        self.jobs_num_label.setText("%d" % self.profile_info["total_jobs"])
 
         self.load_left_menu()
         self.load_timeline()

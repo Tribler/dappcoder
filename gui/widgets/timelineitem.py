@@ -14,10 +14,13 @@ class TimelineItem(QWidget):
 
         self.item_dict = item_dict
         self.time_label.setText(pretty_date(self.item_dict['timestamp'] / 1000))
-        user_part = "User %s" % self.item_dict['username'] if self.item_dict['public_key'] != self.window().profile_info['public_key'] else "You"
+        is_you = self.item_dict['public_key'] == self.window().profile_info['public_key']
+        user_part = "You" if is_you else "User %s" % self.item_dict['username']
         if self.item_dict['type'] == 'created_job':
-            self.main_text_label.setText("%s created a new job: %s" % (user_part, self.item_dict['job_name']))
+            self.main_text_label.setText("%s created a new job: %s." % (user_part, self.item_dict['job_name']))
         elif self.item_dict['type'] == 'created_submission':
-            self.main_text_label.setText("%s made a submission for job: %s" % (user_part, self.item_dict['job_name']))
+            self.main_text_label.setText("%s made a submission for job: %s." % (user_part, self.item_dict['job_name']))
         elif self.item_dict['type'] == 'profile_import':
-            self.main_text_label.setText("%s imported a %s profile" % (user_part, self.item_dict['platform']))
+            self.main_text_label.setText("%s imported a %s profile." % (user_part, self.item_dict['platform']))
+        elif self.item_dict['type'] == 'added_skill':
+            self.main_text_label.setText("%s added a skill (%s) to %s profile." % (user_part, self.item_dict['skill_name'], 'your' if is_you else 'their'))

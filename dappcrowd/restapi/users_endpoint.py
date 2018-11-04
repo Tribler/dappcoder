@@ -31,7 +31,9 @@ class MyProfileEndpoint(DAppCrowdEndpoint):
     def render_GET(self, request):
         trustchain = self.get_trustchain()
         my_pub_key = trustchain.my_peer.public_key.key_to_bin()
-        return json.dumps({"profile": trustchain.persistence.get_detailled_user_info(my_pub_key)})
+        profile_dict = trustchain.persistence.get_detailled_user_info(my_pub_key)
+        profile_dict['total_jobs'] = len(self.get_dappcrowd_overlay().persistence.get_projects())
+        return json.dumps({"profile": profile_dict})
 
 
 class MyProfileSkillsEndpoint(DAppCrowdEndpoint):
@@ -69,6 +71,7 @@ class SpecificUserEndpoint(DAppCrowdEndpoint):
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
         self.putChild("skills", SpecificUserSkillsEndpoint(ipv8, ipfs_api, pub_key))
+        self.putChild("statistics", SpecificUserStatisticsEndpoint(ipv8, ipfs_api, pub_key))
         self.pub_key = pub_key
 
     def render_GET(self, request):
@@ -94,3 +97,23 @@ class SpecificUserSkillsEndpoint(DAppCrowdEndpoint):
         trustchain.endorse_skill(parameters['public_key'][0].decode('hex'), parameters['block_num'][0])
 
         return json.dumps({"success": True})
+
+
+class SpecificUserStatisticsEndpoint(DAppCrowdEndpoint):
+
+    def __init__(self, ipv8, ipfs_api, pub_key):
+        DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
+        self.pub_key = pub_key
+
+    def render_GET(self, request):
+        num_jobs = len(self.get_dappcrowd_overlay().persistence.get_projects_for_user(self.pub_key))
+        num_submissions = len(self.get_dappcrowd_overlay().persistence.get_submissions_for_user(self.pub_key))
+        num_reviews = len(self.get_dappcrowd_overlay().persistence.get_reviews_for_user(self.pub_key))
+
+        return json.dumps({
+            "statistics": {
+                "num_jobs": num_jobs,
+                "num_submissions": num_submissions,
+                "num_reviews": num_reviews
+            }
+        })

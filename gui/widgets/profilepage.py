@@ -99,13 +99,30 @@ class ProfilePage(QWidget):
         # Load the skills
         for i in reversed(range(self.window().skills_container.layout().count())):
             widget = self.window().skills_container.layout().itemAt(i).widget()
-            if widget:
+            if widget and widget != self.window().no_skills_added_label:
                 self.window().skills_container.layout().itemAt(i).widget().setParent(None)
-        self.window().skills_container.layout().addStretch()
 
         for skill_info in data['user']['skills']:
             skill_widget = SkillItem(self.window().skills_container, skill_info)
             self.window().skills_container.layout().insertWidget(self.window().skills_container.layout().count() - 1, skill_widget)
+
+        if len(data['user']['skills']) > 0:
+            self.window().no_skills_added_label.hide()
+        else:
+            self.window().no_skills_added_label.show()
+            if is_me:
+                self.window().no_skills_added_label.setText("You have not added any skills to your profile.")
+            else:
+                self.window().no_skills_added_label.setText("This user did not add any skills to their profile.")
+
+        # Load statistics
+        request_manager = RequestManager()
+        request_manager.perform_request("dappcrowd/users/%s/statistics" % self.active_user, self.on_statistics)
+
+    def on_statistics(self, data):
+        self.window().num_jobs_label.setText("%d" % data['statistics']['num_jobs'])
+        self.window().num_submissions_label.setText("%d" % data['statistics']['num_submissions'])
+        self.window().num_reviews_label.setText("%d" % data['statistics']['num_reviews'])
 
     def load_user(self, public_key):
         self.active_user = public_key

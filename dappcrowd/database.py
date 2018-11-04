@@ -114,6 +114,16 @@ class DAppCrowdDatabase(Database):
             projects_list.append(self.get_project(str(project[1]), project[0]))
         return projects_list
 
+    def get_projects_for_user(self, public_key):
+        """
+        Get projects for a specific user
+        """
+        projects = list(self.execute("SELECT * FROM projects WHERE public_key = ?", (database_blob(public_key), )))
+        projects_list = []
+        for project in projects:
+            projects_list.append(self.get_project(str(project[1]), int(project[2])))
+        return projects_list
+
     def get_project(self, project_pk, project_id):
         if not self.has_project(project_pk, project_id):
             return None
