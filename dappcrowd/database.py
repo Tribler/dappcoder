@@ -121,7 +121,7 @@ class DAppCrowdDatabase(Database):
         projects = list(self.execute("SELECT * FROM projects WHERE public_key = ?", (database_blob(public_key), )))
         projects_list = []
         for project in projects:
-            projects_list.append(self.get_project(str(project[1]), int(project[2])))
+            projects_list.append(self.get_project(str(project[1]), int(project[0])))
         return projects_list
 
     def get_project(self, project_pk, project_id):

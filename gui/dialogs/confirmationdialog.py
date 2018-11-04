@@ -69,7 +69,7 @@ class ConfirmationDialog(DialogContainer):
         self.buttons.append(button)
 
         button.setStyleSheet("""
-        EllipseButton {
+        QToolButton {
             border: 1px solid #B5B5B5;
             border-radius: 13px;
             color: white;
@@ -77,7 +77,7 @@ class ConfirmationDialog(DialogContainer):
             padding-right: 4px;
         }
 
-        EllipseButton::hover {
+        QToolButton::hover {
             border: 1px solid white;
             color: white;
         }

@@ -83,18 +83,16 @@ class SpecificUserSkillsEndpoint(DAppCrowdEndpoint):
 
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
-        self.pub_key = pub_key
+        self.pub_key = pub_key.decode('hex')
 
     def render_PUT(self, request):
         parameters = http.parse_qs(request.content.read(), 1)
-        required_params = ['public_key', 'block_num']
-        for required_param in required_params:
-            if required_param not in parameters:
-                request.setResponseCode(http.BAD_REQUEST)
-                return json.dumps({"error": "missing parameter %s" % required_param})
+        if 'block_num' not in parameters:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "missing block num"})
 
         trustchain = self.get_trustchain()
-        trustchain.endorse_skill(parameters['public_key'][0].decode('hex'), parameters['block_num'][0])
+        trustchain.endorse_skill(self.pub_key, parameters['block_num'][0])
 
         return json.dumps({"success": True})
 
@@ -103,7 +101,7 @@ class SpecificUserStatisticsEndpoint(DAppCrowdEndpoint):
 
     def __init__(self, ipv8, ipfs_api, pub_key):
         DAppCrowdEndpoint.__init__(self, ipv8, ipfs_api)
-        self.pub_key = pub_key
+        self.pub_key = pub_key.decode('hex')
 
     def render_GET(self, request):
         num_jobs = len(self.get_dappcrowd_overlay().persistence.get_projects_for_user(self.pub_key))

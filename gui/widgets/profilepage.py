@@ -103,7 +103,7 @@ class ProfilePage(QWidget):
                 self.window().skills_container.layout().itemAt(i).widget().setParent(None)
 
         for skill_info in data['user']['skills']:
-            skill_widget = SkillItem(self.window().skills_container, skill_info)
+            skill_widget = SkillItem(self.window().skills_container, self, skill_info)
             self.window().skills_container.layout().insertWidget(self.window().skills_container.layout().count() - 1, skill_widget)
 
         if len(data['user']['skills']) > 0:

@@ -1,3 +1,6 @@
+import random
+import string
+
 from twisted.internet.defer import inlineCallbacks
 
 from dappcrowd.community import DAppCrowdCommunity, DAppCrowdTrustchainCommunity
@@ -5,15 +8,30 @@ from pyipv8.ipv8.test.base import TestBase
 from pyipv8.ipv8.test.mocking.ipv8 import MockIPv8
 
 
+class MockIPFSApi(object):
+
+    def __init__(self):
+        self.store = {}
+
+    def add_json(self, json):
+        rand_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        self.store[rand_id] = json
+        return rand_id
+
+    def get_json(self, the_id):
+        return self.store[the_id]
+
+
 class TestDAppCrowdCommunity(TestBase):
 
     def setUp(self):
         super(TestDAppCrowdCommunity, self).setUp()
+        self.mock_ipfs = MockIPFSApi()
         self.initialize(DAppCrowdCommunity, 2)
 
     def create_node(self):
         return MockIPv8(u"curve25519", DAppCrowdCommunity, working_directory=u":memory:", create_trustchain=True,
-                        trustchain_class=DAppCrowdTrustchainCommunity)
+                        trustchain_class=DAppCrowdTrustchainCommunity, ipfs_api=self.mock_ipfs)
 
     @inlineCallbacks
     def test_request_review(self):
@@ -100,7 +118,7 @@ class TestDAppCrowdCommunity(TestBase):
         yield self.deliver_messages()
 
         # Node 1 should have received this submission and added it to the database
-        submissions = self.nodes[0].overlay.persistence.get_submissions()
+        submissions = self.nodes[0].overlay.persistence.get_submissions_for_project(project['public_key'].decode('hex'), project['id'])
         self.assertTrue(submissions)
 
     @inlineCallbacks
@@ -115,7 +133,7 @@ class TestDAppCrowdCommunity(TestBase):
         yield self.deliver_messages()
 
         # Do a review
-        submission = self.nodes[0].overlay.persistence.get_submissions()[0]
+        submission = self.nodes[0].overlay.persistence.get_submissions_for_project(project['public_key'].decode('hex'), project['id'])[0]
         yield self.nodes[0].overlay.create_review(submission['public_key'].decode('hex'), submission['id'], 'test')
         yield self.deliver_messages()
 
