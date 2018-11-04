@@ -17,6 +17,7 @@ class ProfilePage(QWidget):
     def initialize(self):
         self.window().add_skill_button.clicked.connect(self.on_add_skill_button_clicked)
         self.window().connect_github_button.clicked.connect(self.on_github_connect_clicked)
+        self.window().connect_bitbucket_button.clicked.connect(self.on_bitbucket_connect_clicked)
         self.window().profile_back_button.clicked.connect(self.on_back_button_clicked)
 
     def on_back_button_clicked(self):
@@ -29,6 +30,9 @@ class ProfilePage(QWidget):
         self.dialog.dialog_widget.dialog_input.setPlaceholderText("GitHub username")
         self.dialog.button_clicked.connect(self.on_connect_github_dialog_button_clicked)
         self.dialog.show()
+
+    def on_bitbucket_connect_clicked(self):
+        ConfirmationDialog.show_error(self.window(), "Not implemented", "This feature is not implemented yet.")
 
     def on_connect_github_dialog_button_clicked(self, action):
         if action == 0:
