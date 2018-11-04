@@ -166,11 +166,8 @@ class DAppCrowdDatabase(Database):
         Add a submission to the database, from a given block
         """
         tx = block.transaction
-        last_id = list(self.execute("SELECT MAX(id) FROM submissions"))[0][0]
-        if not last_id:
-            last_id = 0
         sql = "INSERT INTO submissions(id, public_key, project_id, project_pk, submission) VALUES(?, ?, ?, ?, ?)"
-        self.execute(sql, (last_id + 1, database_blob(block.public_key), tx['project_id'], database_blob(tx['project_pk']), database_blob(tx['submission'])))
+        self.execute(sql, (tx['id'], database_blob(block.public_key), tx['project_id'], database_blob(tx['project_pk']), database_blob(tx['submission'])))
         self.commit()
 
     def has_submission(self, public_key, submission_id):
@@ -196,7 +193,7 @@ class DAppCrowdDatabase(Database):
             "project_pk": str(submission[3]).encode('hex'),
             "project_name": project['name'],
             "submission": submission_text,
-            "num_reviews": self.get_num_reviews(str(submission[1]), int(submission[2])),
+            "num_reviews": self.get_num_reviews(str(submission[1]), int(submission[0])),
             "min_reviews": project['min_reviews'],
             "did_review": self.did_review(submission_pk, submission_id)
         }
@@ -208,7 +205,7 @@ class DAppCrowdDatabase(Database):
         submissions = list(self.execute("SELECT * FROM submissions WHERE public_key = ?", (database_blob(public_key), )))
         submissions_list = []
         for submission in submissions:
-            submissions_list.append(self.get_submission(str(submission[1]), int(submission[2])))
+            submissions_list.append(self.get_submission(str(submission[1]), int(submission[0])))
         return submissions_list
 
     def get_submissions_for_project(self, project_pk, project_id):
@@ -218,7 +215,7 @@ class DAppCrowdDatabase(Database):
         submissions = list(self.execute("SELECT * FROM submissions WHERE project_pk = ? AND project_id = ?", (database_blob(project_pk), project_id)))
         submissions_list = []
         for submission in submissions:
-            submissions_list.append(self.get_submission(str(submission[1]), int(submission[2])))
+            submissions_list.append(self.get_submission(str(submission[1]), int(submission[0])))
         return submissions_list
 
     def get_reviews_for_user(self, public_key):
