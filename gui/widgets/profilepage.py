@@ -25,7 +25,7 @@ class ProfilePage(QWidget):
 
     def on_github_connect_clicked(self):
         self.dialog = ConfirmationDialog(self.window(), "Connect GitHub with your DevID",
-                                         "You are about to connect your GitHub profile to DevID. To ensure that the account is really owned by you, you should add your member ID to your GitHub bio. This ID is: %s. When done, please enter your GitHub username in the field below:" % self.user_data['user']['mid'],
+                                         "You are about to connect your GitHub profile to DevID. Please enter your GitHub username in the field below:",
                                          [('ADD', BUTTON_TYPE_CONFIRM), ('CLOSE', BUTTON_TYPE_NORMAL)], show_input=True)
         self.dialog.dialog_widget.dialog_input.setPlaceholderText("GitHub username")
         self.dialog.button_clicked.connect(self.on_connect_github_dialog_button_clicked)

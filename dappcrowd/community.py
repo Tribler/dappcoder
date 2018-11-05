@@ -34,9 +34,9 @@ class DAppCrowdTrustchainCommunity(TrustChainCommunity):
         Import your GitHub profile.
         """
         profile_info = self.get_github_profile(username)
-        mid = self.my_peer.mid.encode('hex')
-        if not profile_info['bio'] or mid not in profile_info['bio']:
-            return fail(RuntimeError("your member ID (%s) should be in the GitHub bio!" % mid))
+        #mid = self.my_peer.mid.encode('hex')
+        #if not profile_info['bio'] or mid not in profile_info['bio']:
+        #    return fail(RuntimeError("your member ID (%s) should be in the GitHub bio!" % mid))
 
         # Challenge successful, create TrustChain block
         tx = {
