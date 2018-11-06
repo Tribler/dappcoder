@@ -233,7 +233,7 @@ font-family: &quot;Arial&quot;;
 border: none;</string>
          </property>
          <property name="text">
-          <string>DAppCoder</string>
+          <string>ÐAppCoder</string>
          </property>
         </widget>
        </item>
@@ -285,7 +285,7 @@ color: white;</string>
           <bool>true</bool>
          </property>
          <property name="placeholderText">
-          <string>Search</string>
+          <string>Search jobs or developers</string>
          </property>
         </widget>
        </item>
@@ -442,7 +442,7 @@ border-radius: 10px;</string>
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>../images/default_profile.png</normaloff>../images/default_profile.png</iconset>
+           <normaloff>../images/profile2.png</normaloff>../images/profile2.png</iconset>
          </property>
          <property name="iconSize">
           <size>
